@@ -1609,10 +1609,6 @@ h1[tabindex='-1']:focus {
   font-size: 0.9375rem;
   font-weight: 700;
 }
-.prompt-link {
-  font-weight: 600;
-  text-underline-offset: 3px;
-}
 
 /* The full system prompt: a collapsible block, closed by default. */
 .prompt {

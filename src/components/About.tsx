@@ -1,5 +1,4 @@
-import type { MouseEvent, ReactNode } from 'react'
-import { prefersReducedMotion } from '../lib/motion'
+import type { ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import { Footer } from './Footer'
 import { BackIcon, ChevronIcon } from './icons'
@@ -60,16 +59,6 @@ Three short questions (max 10 words each) the user might ask next:
 2. one about a different privacy topic for the same app,
 3. one comparing the same topic with a similar app.
 Only use these apps: [the 21 apps]`
-
-/** Opens the system prompt section and brings it into view. */
-function openPrompt(e: MouseEvent<HTMLAnchorElement>) {
-  e.preventDefault()
-  const details = document.getElementById('system-prompt') as HTMLDetailsElement | null
-  if (!details) return
-  details.open = true
-  details.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
-  details.querySelector('summary')?.focus({ preventScroll: true })
-}
 
 /** How it works, step by step. Text by Barbora, used as written. */
 const STEPS: { title: string; body: ReactNode }[] = [
@@ -176,14 +165,9 @@ const STEPS: { title: string; body: ReactNode }[] = [
           rule too literally, giving misleading or wrong answers. That's why the rules are so specific and strict, and why every answer links to its
           sources. I also set the model's "creativity" low, since legal text needs to be accurate.
         </p>
-        <p>
-          <a className="prompt-link" href="#system-prompt" onClick={openPrompt}>
-            Read the full system prompt ›
-          </a>
-        </p>
         <details className="prompt" id="system-prompt">
           <summary>
-            <span className="prompt-title">System prompt</span>
+            <span className="prompt-title">Read the system prompt</span>
             <ChevronIcon />
           </summary>
           <pre className="prompt-text">{SYSTEM_PROMPT}</pre>
