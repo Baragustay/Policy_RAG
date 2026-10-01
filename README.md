@@ -1,6 +1,6 @@
 # Policy Translator
 
-Privacy policies and terms of service of 23 popular apps, explained in plain English, so you understand what you agree to. Every answer links each claim to the original policy paragraph, one tap away.
+Privacy policies and terms of service of 23 popular services, explained in plain English, so you understand what you agree to. Every answer links each claim to the original policy paragraph, one tap away.
 
 This repository is the frontend: a static React site. The answers come from a separate RAG backend (FAISS search over the collected policies, Google Gemini for the plain-language answer), hosted as a Gradio Space on Hugging Face. The frontend holds no API keys.
 

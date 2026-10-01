@@ -175,7 +175,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
           <div className="ask-main">
             {entries.length === 0 ? (
               <p className="guide">
-                Hi, I'm Squinty! I read the privacy policies and terms of {appCount} apps, so you don't have to.
+                Hi, I'm Squinty! I read the privacy policies and terms of {appCount} services, so you don't have to.
               </p>
             ) : (
               <AnimatePresence mode="wait" initial={false}>
@@ -195,7 +195,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
 
             <form className="search-box" onSubmit={submit} role="search">
               <label htmlFor="ask-input" className="sr-only">
-                Ask about an app's privacy or terms{focus ? `, searching ${name(focus)}` : `, searching all ${appCount} apps`}
+                Ask about an app's privacy or terms{focus ? `, searching ${name(focus)}` : `, searching all ${appCount} services`}
               </label>
               <textarea
                 id="ask-input"

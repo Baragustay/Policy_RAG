@@ -70,7 +70,7 @@ export function ScopePicker({ focus, origin, onChange }: Props) {
               className="scope-trigger"
               aria-expanded={open}
               aria-haspopup="true"
-              aria-label={`Searching ${focus ? name(focus) : `all ${appCount} apps`}. Choose an app`}
+              aria-label={`Searching ${focus ? name(focus) : `all ${appCount} services`}. Choose an app`}
               onClick={() => setOpen((o) => !o)}
             >
               {focus ? (
@@ -80,12 +80,12 @@ export function ScopePicker({ focus, origin, onChange }: Props) {
                   <GridIcon size={14} />
                 </span>
               )}
-              <strong>{focus ? name(focus) : `All ${appCount} apps`}</strong>
+              <strong>{focus ? name(focus) : `All ${appCount} services`}</strong>
               <SelectIcon />
             </button>
           </FocusOriginFlip>
           {focus && (
-            <button type="button" className="focus-clear" onClick={() => onChange(null)} aria-label={`Clear ${name(focus)}, search all apps`}>
+            <button type="button" className="focus-clear" onClick={() => onChange(null)} aria-label={`Clear ${name(focus)}, search all services`}>
               <CloseIcon size={14} />
             </button>
           )}
@@ -110,7 +110,7 @@ export function ScopePicker({ focus, origin, onChange }: Props) {
                   <span className="all-icon is-small" aria-hidden="true">
                     <GridIcon size={14} />
                   </span>
-                  All {appCount} apps
+                  All {appCount} services
                 </button>
               </li>
               {ids.map((id) => (
