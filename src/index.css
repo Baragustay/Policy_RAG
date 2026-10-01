@@ -755,11 +755,16 @@ h1[tabindex='-1']:focus {
   line-height: 1.1;
 }
 /* Sliding logos rest muted; hover, focus, press or selection brings back full color.
-   That is the only hover effect. */
+   Hovering also draws an orange ring (selected keeps its lighter orange ring). */
 .strip-track .strip-tile .logo-plate {
   filter: saturate(0.6);
   opacity: 0.95;
   transition: filter 0.25s ease, opacity 0.25s ease;
+}
+@media (hover: hover) {
+  .strip-track .strip-tile:hover {
+    box-shadow: 0 0 0 2px var(--warm), 0 12px 28px -14px rgb(31 27 46 / 0.45);
+  }
 }
 .strip-track .strip-tile:hover .logo-plate,
 .strip-track .strip-tile:focus-visible .logo-plate,
