@@ -19,8 +19,8 @@ interface Props {
  */
 export function ScopePicker({ focus, origin, onChange }: Props) {
   const { ids, name } = useApps()
-  // Every app we offer, including Gmail and YouTube (they share Google's policies).
-  const appCount = ids.length
+  // Every service we offer, including Gmail and YouTube (they share Google's policies).
+  const serviceCount = ids.length
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
@@ -77,7 +77,7 @@ export function ScopePicker({ focus, origin, onChange }: Props) {
               className="scope-trigger"
               aria-expanded={open}
               aria-haspopup="true"
-              aria-label={`Searching ${focus ? name(focus) : `all ${appCount} services`}. Choose an app`}
+              aria-label={`Searching ${focus ? name(focus) : `all ${serviceCount} services`}. Choose a service`}
               onClick={() => setOpen((o) => !o)}
             >
               {focus ? (
@@ -87,7 +87,7 @@ export function ScopePicker({ focus, origin, onChange }: Props) {
                   <GridIcon size={14} />
                 </span>
               )}
-              <strong>{focus ? name(focus) : `All ${appCount} services`}</strong>
+              <strong>{focus ? name(focus) : `All ${serviceCount} services`}</strong>
               <SelectIcon />
             </button>
           </FocusOriginFlip>
@@ -117,7 +117,7 @@ export function ScopePicker({ focus, origin, onChange }: Props) {
                   <span className="all-icon is-small" aria-hidden="true">
                     <GridIcon size={14} />
                   </span>
-                  All {appCount} services
+                  All {serviceCount} services
                 </button>
               </li>
               {ids.map((id) => (

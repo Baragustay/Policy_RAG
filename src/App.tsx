@@ -5,9 +5,11 @@ import { AppsProvider } from './components/AppsProvider'
 import { Background } from './components/Background'
 import { Home } from './components/Home'
 import { Splash } from './components/Splash'
+import { UndoToast } from './components/UndoToast'
 import { shortAnswerText } from './lib/answer'
 import { ask, connect } from './lib/api'
 import { backendApp } from './lib/apps'
+import { markSplashSeen, splashSeen } from './lib/splash'
 import { useTheme } from './lib/theme'
 import type { AskRequest, AskResponse, Entry } from './lib/types'
 
@@ -33,25 +35,11 @@ const blurViews: Variants = {
 
 const uid = () => Math.random().toString(36).slice(2, 10)
 
-// The splash plays once per browser session, not on every reload.
-const SPLASH_KEY = 'pt-splash-seen'
-function splashSeen() {
-  try {
-    return sessionStorage.getItem(SPLASH_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-function markSplashSeen() {
-  try {
-    sessionStorage.setItem(SPLASH_KEY, '1')
-  } catch {
-    /* private mode: the splash may show again, which is harmless */
-  }
-}
+/** The previous answer's question and type, sent along so follow-ups keep their context. */
+type Context = { question: string; type: string }
 
 /** What a scope change cleared, so it can be undone for a few seconds. */
-type Cleared = { focus: string | null; entries: Entry[]; context: { question: string; type: string } }
+type Cleared = { focus: string | null; entries: Entry[]; context: Context }
 
 /** What screen readers hear when an answer arrives. */
 function announcement(data: AskResponse): string {
@@ -70,8 +58,7 @@ export default function App() {
   const [cleared, setCleared] = useState<Cleared | null>(null)
   const busyRef = useRef(false)
   const shownView = useRef<View>(view)
-  // The previous answer's question and type, sent along so follow-ups keep their context.
-  const context = useRef({ question: '', type: '' })
+  const context = useRef<Context>({ question: '', type: '' })
 
   // The splash is a short intro, never a wait: it leaves on its own after ~2 s (or on tap).
   useEffect(() => {
@@ -206,24 +193,7 @@ export default function App() {
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {live}
         </div>
-        <AnimatePresence>
-          {cleared && view === 'home' && (
-            <motion.div
-              key="undo"
-              className="toast"
-              role="status"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <span>Started a fresh search. Your earlier answers were cleared.</span>
-              <button type="button" className="toast-btn" onClick={undoClear}>
-                Undo
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <UndoToast show={!!cleared && view === 'home'} onUndo={undoClear} />
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div key={view} className="view" variants={view === 'about' ? blurViews : views} initial="initial" animate="enter" exit="exit">
             {view === 'home' && (
@@ -237,6 +207,7 @@ export default function App() {
                 onSend={send}
                 onRetry={retry}
                 onAbout={() => go('about')}
+                onReplayIntro={() => setSplash(true)}
               />
             )}
             {view === 'about' && <About theme={theme} onToggleTheme={toggle} onBack={() => go('home')} />}

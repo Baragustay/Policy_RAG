@@ -74,7 +74,8 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
 
   // Touch screens: the strip slides for 5 seconds after load, then settles (and stays swipeable).
   // Motion that stops within 5 s needs no pause control (WCAG 2.2.2); on phones the strip is
-  // mostly a visual effect, and the app names below do the real job.
+  // mostly a visual effect, and the picker in the search card does the real job. Only applies
+  // while the device has no mouse: if one is connected later, the strip moves again.
   const [settled, setSettled] = useState(false)
   useEffect(() => {
     if (hoverOnly) return
@@ -204,53 +205,33 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
           onScroll={onStripScroll}
           tabIndex={0}
           role="region"
-          aria-label="App logos. Use the arrow keys to scroll, or pick an app from the list below."
+          aria-label="Service logos. Use the arrow keys to scroll."
         >
           <motion.div className="strip-drift" style={{ x: reduced ? 0 : drift }}>
-            <ul className="strip-track" ref={trackRef} aria-label="Ask about one app">
+            <ul className="strip-track" ref={trackRef} aria-label="Ask about one service">
               {Array.from({ length: COPIES }, (_, copy) => ids.map((id) => tile(id, copy)))}
             </ul>
           </motion.div>
         </motion.div>
 
-        {/* Fixed in the middle: apps slide behind it through a soft blur. */}
+        {/* Fixed in the middle: the logos slide behind it through a soft blur. */}
         <div className="strip-center" aria-hidden="true" />
         <div className="strip-all-pos">
           <motion.button
             type="button"
             className={`strip-tile strip-all ${focus === null ? 'is-on' : ''}`}
             aria-pressed={focus === null}
-            aria-label="Ask about all apps"
+            aria-label="Ask about all services"
             onClick={onPickAll}
             whileTap={{ scale: 0.92 }}
           >
             <span className="all-icon" aria-hidden="true">
               <GridIcon size={18} />
             </span>
-            <span className="strip-name">All apps</span>
+            <span className="strip-name">All services</span>
           </motion.button>
         </div>
       </div>
-
-      {/* Same as the logos: each name starts a search about that app. */}
-      <p className="app-names">
-        <span className="app-names-label">Apps covered: </span>
-        {ids.map((id, i) => (
-          <span key={id}>
-            <button
-              type="button"
-              className={`app-name-link ${focus === id ? 'is-on' : ''}`}
-              data-label={name(id)}
-              aria-pressed={focus === id}
-              aria-label={`Ask about ${name(id)}`}
-              onClick={(e) => onPick(id, e.currentTarget)}
-            >
-              {name(id)}
-            </button>
-            {i < ids.length - 1 && <span aria-hidden="true"> · </span>}
-          </span>
-        ))}
-      </p>
     </div>
   )
 }

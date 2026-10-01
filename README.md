@@ -8,7 +8,7 @@ This repository is the frontend: a static React site. The answers come from a se
 
 - **Ask in plain words.** One question gives one answer: a short answer, what it means for you, and a "Watch out" note, each claim with a numbered source.
 - **Original text one tap away.** Citations open the exact policy paragraph, with a link to the full policy.
-- **All apps or one.** Ask across every app, or focus on one from the logo strip, the app list or the scope picker. Changing app starts fresh.
+- **All services or one.** Ask across every service, or focus on one from the logo strip, the service list or the scope picker. Changing service starts fresh.
 - **Follow-ups keep context.** "Can I opt out?" is understood in light of the previous question. Earlier answers collapse into a Recent list.
 - **Squinty**, the mascot, guides the search and reacts to answers.
 - **Accessible by design:** keyboard use, screen reader announcements, WCAG AA contrast, light and dark themes, reduced motion and reduced transparency support.
@@ -50,21 +50,24 @@ src/
     ScopePicker.tsx    "All apps" / one-app pill and app list
     AnswerCard.tsx     Answer parts, citations, related questions, sources
     Sources.tsx        Expandable original policy text
-    About.tsx          How it works
+    Squint.tsx         Squinty in his moods, and his hover hello
+    UndoToast.tsx      "Undo" after switching service
+    About.tsx          How it works, the model and the full system prompt
   lib/
     api.ts             Gradio client: /ask and /list_apps
     answer.ts          Splitting and summarising answers
-    apps.ts            App list context; Gmail and YouTube ask as Google
+    apps.ts            Service list context; Gmail and YouTube ask as Google
+    splash.ts          Splash once per browser session
   assets/squint/       Squinty's artwork, one SVG per mood
   index.css            All styles, organised by section
-scripts/logos-plugin.ts  Resolves app logos at build time (see LOGOS.md)
+scripts/logos-plugin.ts  Resolves service logos at build time (see LOGOS.md)
 apps.config.json         App ids, display names and logo sources
 public/logos/            Official logo files added by hand
 ```
 
 ## Logos
 
-Logos are resolved at build time: an official file in `public/logos/` first, then Simple Icons, then a tile with the app's name. Logos are never drawn by hand. See [LOGOS.md](LOGOS.md) for which app uses which source. Logos belong to their owners; the site is not affiliated with any of the apps shown.
+Logos are resolved at build time: an official file in `public/logos/` first, then Simple Icons, then a tile with the service's name. Logos are never drawn by hand. See [LOGOS.md](LOGOS.md) for which service uses which source. Logos belong to their owners; the site is not affiliated with any of the services shown.
 
 ## Deploy
 

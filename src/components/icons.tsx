@@ -15,9 +15,10 @@ export const ChevronIcon = ({ size = 16 }: { size?: number }) => (
     <path d="m6 9 6 6 6-6" />
   </svg>
 )
-export const ArrowIcon = ({ size = 18 }: { size?: number }) => (
+export const HelpIcon = ({ size = 18 }: { size?: number }) => (
   <svg {...base} width={size} height={size}>
-    <path d="M5 12h14M13 6l6 6-6 6" />
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.6 9.2a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2.2-2.4 3.8M12 17.2h.01" />
   </svg>
 )
 export const BackIcon = ({ size = 20 }: { size?: number }) => (

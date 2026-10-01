@@ -17,12 +17,13 @@ interface Props {
   onSend: (text: string) => void
   onRetry: (entryId: string) => void
   onAbout: () => void
+  onReplayIntro: () => void
 }
 
 const toSearch = () =>
   document.getElementById('ask')?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
 
-export function Home({ theme, onToggleTheme, entries, focus, busy, onFocus, onSend, onRetry, onAbout }: Props) {
+export function Home({ theme, onToggleTheme, entries, focus, busy, onFocus, onSend, onRetry, onAbout, onReplayIntro }: Props) {
   const [origin, setOrigin] = useState<FocusOrigin | null>(null)
 
   // Picking an app in the hero focuses the search on it: the scope pill grows out of the tapped
@@ -54,7 +55,7 @@ export function Home({ theme, onToggleTheme, entries, focus, busy, onFocus, onSe
         Skip to search
       </a>
       <header className="hero">
-        <TopBar theme={theme} onToggleTheme={onToggleTheme} onAbout={onAbout} />
+        <TopBar theme={theme} onToggleTheme={onToggleTheme} onAbout={onAbout} onReplayIntro={onReplayIntro} />
         <SplitHero focus={focus} onPick={pick} onPickAll={pickAll} />
       </header>
 

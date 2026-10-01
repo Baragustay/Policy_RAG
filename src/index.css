@@ -100,6 +100,12 @@
   box-sizing: border-box;
 }
 
+/* No rubber-band bounce or scroll chaining past the page edges. */
+html,
+body {
+  overscroll-behavior: none;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 24px;
@@ -269,6 +275,22 @@ h1[tabindex='-1']:focus {
   line-height: 1.5;
   background: #1f1b2e;
   color: #e9e5f5;
+}
+.footer p {
+  max-width: 820px;
+  margin: 0 auto;
+}
+.footer-services-title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-stretch: 108%;
+  font-size: 0.9375rem;
+  color: #ffffff;
+}
+.footer-services {
+  margin-bottom: 18px !important;
+  color: #c9c2dc;
 }
 :root[data-theme='dark'] .footer {
   background: #0d0b14;
@@ -504,6 +526,58 @@ h1[tabindex='-1']:focus {
   color: var(--ink-2);
 }
 
+/* Skip link: hidden until keyboard focus, then the first thing on the page. */
+.skip-link {
+  position: absolute;
+  z-index: 70;
+  top: 8px;
+  left: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #5b48b8;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* Undo notice after switching service. */
+.toast {
+  position: fixed;
+  z-index: 80;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 10px 10px 18px;
+  border-radius: 999px;
+  background: #1f1b2e;
+  color: #f2eff9;
+  font-size: 0.875rem;
+  box-shadow: 0 12px 32px -12px rgb(31 27 46 / 0.55);
+}
+.toast-btn {
+  flex: none;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--warm);
+  color: var(--warm-ink);
+  font-weight: 600;
+}
+:root[data-theme='dark'] .toast {
+  background: #f2eff9;
+  color: #1f1b2e;
+}
+
 /* ---------- 5. Hero ---------- */
 .hero {
   position: relative;
@@ -531,6 +605,17 @@ h1[tabindex='-1']:focus {
   align-items: center;
   gap: 10px;
   min-width: 0;
+}
+.topbar-squint {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  transition: transform 0.15s;
+}
+.topbar-squint:active {
+  transform: scale(0.92);
 }
 .me-name {
   color: var(--ink);
@@ -650,7 +735,7 @@ h1[tabindex='-1']:focus {
   z-index: 2;
   width: 100%;
   /* A sideways-scrolling box also clips vertically, so it needs room for the tiles' full shadow
-     (about 26px below). The negative margins give that room back, so nothing else moves. */
+     (about 10px below, plus the hover ring). The negative margins give that room back. */
   padding: 28px 0;
   margin: -20px 0;
   overflow-x: auto;
@@ -724,7 +809,7 @@ h1[tabindex='-1']:focus {
   background: rgb(255 255 255 / 0.72);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   backdrop-filter: blur(16px) saturate(1.4);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 12px 28px -14px rgb(31 27 46 / 0.45);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 4px 10px -4px rgb(31 27 46 / 0.28);
   color: #1f1b2e;
   transition: box-shadow 0.25s;
 }
@@ -742,7 +827,7 @@ h1[tabindex='-1']:focus {
   -webkit-user-drag: none;
 }
 .strip-tile.is-on {
-  box-shadow: 0 0 0 3px var(--select), 0 12px 28px -14px rgb(31 27 46 / 0.45);
+  box-shadow: 0 0 0 3px var(--select), 0 4px 10px -4px rgb(31 27 46 / 0.28);
 }
 .strip-tile:focus-visible {
   outline: 3px solid #5b48b8;
@@ -766,7 +851,7 @@ h1[tabindex='-1']:focus {
 }
 @media (hover: hover) {
   .strip-track .strip-tile:hover {
-    box-shadow: 0 0 0 2px var(--warm), 0 12px 28px -14px rgb(31 27 46 / 0.45);
+    box-shadow: 0 0 0 2px var(--warm), 0 4px 10px -4px rgb(31 27 46 / 0.28);
   }
 }
 .strip-track .strip-tile:hover .logo-plate,
@@ -805,9 +890,41 @@ h1[tabindex='-1']:focus {
 .strip-tile.strip-all {
   flex-direction: row;
   gap: 10px;
-  width: calc(var(--tile) * 2.6);
-  padding: 0 16px;
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--bg-base) 70%, transparent), 0 12px 26px -12px rgb(31 27 46 / 0.5);
+  width: auto;
+  min-width: calc(var(--tile) * 2.6);
+  padding: 0 18px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--bg-base) 70%, transparent), 0 5px 12px -5px rgb(31 27 46 / 0.32);
+}
+/* Selected (the default when the page opens): the same light-orange ring as a picked logo. */
+.strip-tile.strip-all.is-on {
+  box-shadow: 0 0 0 3px var(--select), 0 0 0 8px color-mix(in srgb, var(--bg-base) 70%, transparent), 0 5px 12px -5px rgb(31 27 46 / 0.32);
+}
+/* Dark mode: no halo (it would read as a black border), just the tile and its ring. */
+:root[data-theme='dark'] .strip-tile.strip-all {
+  box-shadow: 0 5px 12px -5px rgb(0 0 0 / 0.5);
+}
+:root[data-theme='dark'] .strip-tile.strip-all.is-on {
+  box-shadow: 0 0 0 3px var(--select), 0 5px 12px -5px rgb(0 0 0 / 0.5);
+}
+
+/* One ring at a time: while another tile is hovered, the selected tile (by default "All services")
+   drops its ring and keeps only its normal shadow. */
+@media (hover: hover) {
+  .strip-wrap:has(.strip-tile:not(.is-on):hover) .strip-track .strip-tile.is-on {
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 4px 10px -4px rgb(31 27 46 / 0.28);
+  }
+  .strip-wrap:has(.strip-tile:not(.is-on):hover) .strip-tile.strip-all.is-on {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--bg-base) 70%, transparent), 0 5px 12px -5px rgb(31 27 46 / 0.32);
+  }
+  :root[data-theme='dark'] .strip-wrap:has(.strip-tile:not(.is-on):hover) .strip-tile.strip-all.is-on {
+    box-shadow: 0 5px 12px -5px rgb(0 0 0 / 0.5);
+  }  /* "All services" gets the same hover ring as the logos when it isn't the selected one. */
+  .strip-tile.strip-all:not(.is-on):hover {
+    box-shadow: 0 0 0 2px var(--warm), 0 0 0 7px color-mix(in srgb, var(--bg-base) 70%, transparent), 0 5px 12px -5px rgb(31 27 46 / 0.32);
+  }
+  :root[data-theme='dark'] .strip-tile.strip-all:not(.is-on):hover {
+    box-shadow: 0 0 0 2px var(--warm), 0 5px 12px -5px rgb(0 0 0 / 0.5);
+  }
 }
 .strip-tile.strip-all .all-icon {
   width: 32px;
@@ -821,60 +938,14 @@ h1[tabindex='-1']:focus {
   font-size: 0.9375rem;
 }
 
-/* Plain-text list of apps; each name works like its logo and turns bold on hover. */
-.app-names {
-  /* Above the strip, whose shadow padding reaches over the first line of names. */
-  position: relative;
-  z-index: 5;
-  max-width: 820px;
-  margin: 4px auto 0;
-  padding: 0 8px;
-  text-align: center;
-  font-size: 0.75rem;
-  line-height: 1.6;
-  color: var(--ink-2);
-}
-.app-names-label {
-  font-weight: 700;
-  color: var(--ink);
-}
-.app-name-link {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  /* At least 24×24px to tap (WCAG 2.5.8), even for short names like "X". */
-  min-width: 24px;
-  min-height: 24px;
-  padding: 3px 0;
-  border: 0;
-  border-radius: 4px;
-  background: none;
-  font: inherit;
-  color: inherit;
-}
-/* Invisible bold copy (after the text, so the baseline stays put) reserves the bold width,
-   so hovering never shifts the line. */
-.app-name-link::after {
-  content: attr(data-label);
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
-  font-weight: 700;
-}
-.app-name-link:hover,
-.app-name-link:focus-visible,
-.app-name-link.is-on {
-  color: var(--ink);
-  font-weight: 700;
-}
-
 /* ---------- 6. Question & answer card ---------- */
 .ask-section {
   /* Full width even inside the page's flex column (auto margins alone would shrink it). */
   width: 100%;
   max-width: 920px;
-  margin: 12px auto 0;
+  /* 72px from the logo tiles, the same gap as below the card (to the footer). Part of it is
+     already the strip's own room under the tiles. */
+  margin: 60px auto 0;
   padding: 0 16px;
   scroll-margin-top: 16px;
 }
@@ -1726,6 +1797,27 @@ h1[tabindex='-1']:focus {
   }
 }
 
+/* Squinty's hover hello: a longer message, so it wraps onto two lines and sits just under
+   his floor shadow. No wait: a soft fade-in with a small rise. */
+.squinty-hello {
+  display: inline-flex;
+  flex: none;
+  cursor: default;
+}
+.squinty-hello[data-tip]::before {
+  top: calc(100% - 8px);
+  width: max-content;
+  max-width: 190px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.35;
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+.squinty-hello[data-tip-align='start']::before {
+  max-width: 300px;
+  text-align: left;
+}
+
 /* Short intro on load: Squinty, the name and the promise. */
 .splash {
   position: fixed;
@@ -1794,22 +1886,6 @@ h1[tabindex='-1']:focus {
   opacity: 1;
   transform: translate(-50%, 0);
 }
-/* Squinty's hover hello: a longer message, so it wraps onto two lines and sits just under
-   his floor shadow. No wait: a soft fade-in with a small rise. */
-.squinty-hello {
-  display: inline-flex;
-  flex: none;
-  cursor: default;
-}
-.squinty-hello[data-tip]::before {
-  top: calc(100% - 8px);
-  width: max-content;
-  max-width: 190px;
-  white-space: normal;
-  text-align: center;
-  line-height: 1.35;
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-}
 /* Near a left edge: the bubble opens to the right from the element's left side. */
 [data-tip-align='start']::before {
   left: 0;
@@ -1818,10 +1894,6 @@ h1[tabindex='-1']:focus {
 [data-tip-align='start']:hover::before,
 [data-tip-align='start']:focus-visible::before {
   transform: none;
-}
-.squinty-hello[data-tip-align='start']::before {
-  max-width: 300px;
-  text-align: left;
 }
 /* Near the right edge: align the bubble to the element's right side. */
 [data-tip-align='end']::before {
@@ -1843,58 +1915,6 @@ h1[tabindex='-1']:focus {
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
-}
-
-/* Skip link: hidden until keyboard focus, then the first thing on the page. */
-.skip-link {
-  position: absolute;
-  z-index: 70;
-  top: 8px;
-  left: 8px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: #5b48b8;
-  color: #ffffff;
-  font-weight: 600;
-  text-decoration: none;
-  transform: translateY(-160%);
-}
-.skip-link:focus-visible {
-  transform: none;
-}
-
-/* Undo notice after switching app. */
-.toast {
-  position: fixed;
-  z-index: 80;
-  left: 50%;
-  bottom: calc(20px + env(safe-area-inset-bottom));
-  translate: -50% 0;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: max-content;
-  max-width: calc(100vw - 32px);
-  padding: 10px 10px 10px 18px;
-  border-radius: 999px;
-  background: #1f1b2e;
-  color: #f2eff9;
-  font-size: 0.875rem;
-  box-shadow: 0 12px 32px -12px rgb(31 27 46 / 0.55);
-}
-.toast-btn {
-  flex: none;
-  min-height: 36px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--warm);
-  color: var(--warm-ink);
-  font-weight: 600;
-}
-:root[data-theme='dark'] .toast {
-  background: #f2eff9;
-  color: #1f1b2e;
 }
 
 /* ---------- 11. Responsive ---------- */
@@ -1928,6 +1948,7 @@ h1[tabindex='-1']:focus {
 
 /* Phones */
 @media (max-width: 480px) {
+
   /* Top bar stays on one line. */
   .topbar-me {
     gap: 6px;

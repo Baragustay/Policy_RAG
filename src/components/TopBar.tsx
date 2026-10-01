@@ -1,6 +1,6 @@
 import { siGithub } from 'simple-icons'
 import type { Theme } from '../lib/theme'
-import { ArrowIcon } from './icons'
+import { HelpIcon } from './icons'
 import { Squint } from './Squint'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -8,14 +8,17 @@ interface Props {
   theme: Theme
   onToggleTheme: (el: HTMLElement | null) => void
   onAbout: () => void
+  onReplayIntro: () => void
 }
 
-/** Top bar: Squinty, Barbora's portfolio and contact links on the left; How it works and theme on the right. */
-export function TopBar({ theme, onToggleTheme, onAbout }: Props) {
+/** Top bar: Squinty, Barbora's portfolio and contact links on the left; About and theme on the right. */
+export function TopBar({ theme, onToggleTheme, onAbout, onReplayIntro }: Props) {
   return (
     <nav className="topbar" aria-label="Site">
       <div className="topbar-me">
-        <Squint mood="idle" size={38} />
+        <button type="button" className="topbar-squint" onClick={onReplayIntro} aria-label="Replay intro" data-tip="Replay intro">
+          <Squint mood="idle" size={38} />
+        </button>
         <a className="me-name" data-tip="Portfolio" href="https://barboragustafsson.com/" target="_blank" rel="noopener noreferrer">
           Barbora Gustafsson<span className="sr-only"> (portfolio, opens in a new tab)</span>
         </a>
@@ -45,9 +48,9 @@ export function TopBar({ theme, onToggleTheme, onAbout }: Props) {
         </span>
       </div>
       <div className="topbar-actions">
-        <button type="button" className="text-btn" onClick={onAbout} aria-label="How it works" data-tip="How it works">
-          <span className="text-btn-label">How it works</span>
-          <ArrowIcon size={16} />
+        <button type="button" className="text-btn" onClick={onAbout} aria-label="About" data-tip="About">
+          <span className="text-btn-label">About</span>
+          <HelpIcon size={18} />
         </button>
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       </div>

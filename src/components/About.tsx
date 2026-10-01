@@ -66,8 +66,8 @@ const STEPS: { title: string; body: ReactNode }[] = [
     title: 'Collect',
     body: (
       <p>
-        I gathered the EU privacy policies and terms of service of 21 popular apps with a Python script. Some sites load their text with JavaScript
-        and block simple scrapers, so for those I used a reader service that renders the page first. Where an app showed several versions on one page,
+        I gathered the EU privacy policies and terms of service of 21 popular services with a Python script. Some sites load their text with JavaScript
+        and block simple scrapers, so for those I used a reader service that renders the page first. Where a service showed several versions on one page,
         like X's current and upcoming terms, I split them so each answer cites the right one.
       </p>
     ),
@@ -83,7 +83,7 @@ const STEPS: { title: string; body: ReactNode }[] = [
         </p>
         <p>
           Then I split every document into short sections of about 1,200 characters, following the policy's own headings. Each section overlaps
-          slightly with the next, so a sentence cut in half still shows up whole somewhere. Every section carries a label: which app, privacy policy
+          slightly with the next, so a sentence cut in half still shows up whole somewhere. Every section carries a label: which service, privacy policy
           or terms, which heading, and a link to the original page. I also removed sections that only apply to US states, like California privacy
           rights, since this app is for European readers.
         </p>
@@ -112,15 +112,15 @@ const STEPS: { title: string; body: ReactNode }[] = [
             "retention period." The AI rewrites your question into the words policies actually use, which makes the search much more accurate.
           </li>
           <li>
-            <strong>The app is detected.</strong> The search spots which apps you mention, including nicknames like Gmail (Google) or ChatGPT
-            (OpenAI), and even typos like "isntagram." If you tapped an app, only that app's documents are searched.
+            <strong>The service is detected.</strong> The search spots which services you mention, including nicknames like Gmail (Google) or ChatGPT
+            (OpenAI), and even typos like "isntagram." If you tapped a service, only that service's documents are searched.
           </li>
           <li>
             <strong>The closest sections are found.</strong> Your question becomes a list of numbers the same way, and a search library called FAISS
             finds the sections closest to it in meaning.
           </li>
           <li>
-            <strong>Comparisons stay fair.</strong> If you ask about two or three apps, each app gets its own share of results, so one app with a long
+            <strong>Comparisons stay fair.</strong> If you ask about two or three services, each service gets its own share of results, so one service with a long
             policy can't crowd out the others.
           </li>
           <li>
@@ -149,7 +149,7 @@ const STEPS: { title: string; body: ReactNode }[] = [
           </li>
           <li>keep conditions exactly: "may" stays "may," and "only for paid plans" never gets dropped</li>
           <li>never turn "the policy doesn't say" into a "No"</li>
-          <li>when comparing apps, describe each one separately so one app's facts never end up attached to another</li>
+          <li>when comparing services, describe each one separately so one service's facts never end up attached to another</li>
         </ul>
         <p>
           The answer always follows the same shape: a short answer, what it means for you, and what to watch out for. Gemini also suggests three
@@ -229,11 +229,11 @@ export function About({ theme, onToggleTheme, onBack }: { theme: Theme; onToggle
         </section>
 
         <section className="glass-solid about-card">
-          <h2>Limits</h2>
+          <h2>Limitations</h2>
           <ul className="limits">
             <li>Summaries can miss nuance. Check the original text before decisions that matter.</li>
             <li>Policies change. These versions were collected in October 2026.</li>
-            <li>It can't rank all apps at once. Ask about up to three at a time.</li>
+            <li>It can't rank all services at once. Ask about up to three at a time.</li>
           </ul>
         </section>
 

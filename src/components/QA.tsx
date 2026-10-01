@@ -38,13 +38,15 @@ function moodFor(entry: Entry | undefined): Mood {
   return entry.data.type === 'answer' ? 'answer' : 'notfound' // not_found, pick_apps, error
 }
 
-const GUIDE: Record<Mood, string> = {
-  idle: 'Ask me anything about these apps.',
+/** Squinty's line above the search box once there is an answer (or one is loading). */
+const GUIDE: Partial<Record<Mood, string>> = {
   thinking: 'Reading the small print...',
   answer: "Found it! Here's what the policies say.",
-  watch: 'Careful with this one!',
   notfound: "Hmm, that one's tricky. See below.",
 }
+
+/** Height the answer area keeps while the first answer loads (about one typical answer). */
+const TYPICAL_ANSWER_HEIGHT = 460
 
 type Flight = { text: string; from: DOMRect; dx: number; dy: number }
 
@@ -58,15 +60,17 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
   const [draft, setDraft] = useState('')
   const [flight, setFlight] = useState<Flight | null>(null)
   const [openRecent, setOpenRecent] = useState<Set<string>>(new Set())
-  const [reservedHeight, setReservedHeight] = useState(460)
+  const [reservedHeight, setReservedHeight] = useState(TYPICAL_ANSWER_HEIGHT)
   const card = useRef<HTMLElement>(null)
   const input = useRef<HTMLTextAreaElement>(null)
   const answerRef = useRef<HTMLDivElement>(null)
   const lastAnswerHeight = useRef(0)
   const flightTimer = useRef<number | undefined>(undefined)
+  // The answer whose question was already auto-cleared from the field (see clearIfAsked).
+  const clearedFor = useRef<string | null>(null)
 
-  // Every app we offer, including Gmail and YouTube (they share Google's policies).
-  const appCount = ids.length
+  // Every service we offer, including Gmail and YouTube (they share Google's policies).
+  const serviceCount = ids.length
   const newest = entries[entries.length - 1]
   const recent = entries.slice(0, -1).reverse()
   const loading = newest?.status === 'loading'
@@ -85,7 +89,6 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
     return () => ro.disconnect()
   }, [newest?.id, loading])
 
-
   // A new question: bring the card to the top so the answer sits right below the search box.
   const count = useRef(entries.length)
   useEffect(() => {
@@ -95,17 +98,25 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
     count.current = entries.length
   }, [entries.length, reduced])
 
-  // Grow the textarea with its content.
-  useEffect(() => {
+  // Grow the textarea with what's typed (an empty field is one line, whatever the placeholder).
+  // Re-measured when the width changes, e.g. rotating a phone.
+  useLayoutEffect(() => {
     const el = input.current
     if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`
+    const fit = () => {
+      el.style.height = 'auto'
+      if (!el.value) return
+      el.style.height = `${Math.min(el.scrollHeight, 160)}px`
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
   }, [draft])
 
   // The question stays in the search field while (and after) it is answered.
   const ask = (text: string) => {
-    setReservedHeight(Math.min(lastAnswerHeight.current || 460, window.innerHeight * 0.75))
+    setReservedHeight(Math.min(lastAnswerHeight.current || TYPICAL_ANSWER_HEIGHT, window.innerHeight * 0.75))
     setDraft(text)
     onSend(text)
   }
@@ -118,10 +129,8 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
   }
 
   // Clicking into the field clears the question that was just asked, ready for a new one.
-  // Anything newly typed is never wiped. The old question can always come back: the Edit button
-  // above the answer, or the ↑ key in an empty field.
-  // Auto-clear happens once per answer, so a question brought back for editing stays put.
-  const clearedFor = useRef<string | null>(null)
+  // Anything newly typed is never wiped, and the auto-clear happens once per answer, so a question
+  // brought back for editing (the Edit button above the answer, or ↑ in an empty field) stays put.
   const showsAsked = () => !!newest && draft === newest.message && clearedFor.current !== newest.id
   const clearIfAsked = () => {
     if (!showsAsked() || !newest) return
@@ -170,14 +179,14 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
     <>
       <section ref={card} className="qa-card glass-solid" aria-labelledby="ask-title">
         <h2 className="sr-only" id="ask-title">
-          Ask about an app's privacy or terms
+          Ask about a service's privacy or terms
         </h2>
         <div className="ask-row">
           <HelloSquinty mood={mood} size={64} className="ask-squint" align="start" message="I'm Squinty!" />
           <div className="ask-main">
             {entries.length === 0 ? (
               <p className="guide">
-                Hi, I'm Squinty! I read the privacy policies and terms of {appCount} services, so you don't have to.
+                Hi, I'm Squinty! I read the privacy policies and terms of {serviceCount} services, so you don't have to.
               </p>
             ) : (
               <AnimatePresence mode="wait" initial={false}>
@@ -197,7 +206,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
 
             <form className="search-box" onSubmit={submit} role="search">
               <label htmlFor="ask-input" className="sr-only">
-                Ask about an app's privacy or terms{focus ? `, searching ${name(focus)}` : `, searching all ${appCount} services`}
+                Ask about a service's privacy or terms{focus ? `, searching ${name(focus)}` : `, searching all ${serviceCount} services`}
               </label>
               <textarea
                 id="ask-input"
@@ -220,7 +229,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
                   // Cursor still in the field after asking: the first typed character replaces the old question.
                   if (showsAsked() && e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) e.currentTarget.select()
                 }}
-                placeholder="Ask about an app's privacy or terms..."
+                placeholder="Ask about a service's privacy or terms..."
                 enterKeyHint="search"
               />
               <button type="submit" className="send-btn" aria-label="Ask" disabled={!draft.trim() || busy}>

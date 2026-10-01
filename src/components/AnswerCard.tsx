@@ -213,7 +213,7 @@ function PickApps({ onSend, busy }: { onSend: (text: string) => void; busy: bool
   return (
     <motion.div variants={part} className="pick">
       <p className="pick-help" id="pick-help">
-        Choose up to 3 apps <span className="pick-count">({picked.length}/3)</span>
+        Choose up to 3 services <span className="pick-count">({picked.length}/3)</span>
       </p>
       <ul className="pick-grid" aria-describedby="pick-help">
         {ids.map((id) => {
@@ -229,7 +229,7 @@ function PickApps({ onSend, busy }: { onSend: (text: string) => void; busy: bool
         })}
       </ul>
       <button type="button" className="btn btn-primary" disabled={!picked.length || busy} onClick={() => onSend([...new Set(picked.map((id) => name(backendApp(id))))].join(', '))}>
-        {picked.length ? `Ask about ${picked.map(name).join(', ')}` : 'Pick at least one app'}
+        {picked.length ? `Ask about ${picked.map(name).join(', ')}` : 'Pick at least one service'}
       </button>
     </motion.div>
   )
