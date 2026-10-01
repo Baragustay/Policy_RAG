@@ -1604,6 +1604,62 @@ h1[tabindex='-1']:focus {
 .steps li ul li + li {
   margin-top: 6px;
 }
+.step-sub {
+  margin: 16px 0 6px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.prompt-link {
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+/* The full system prompt: a collapsible block, closed by default. */
+.prompt {
+  margin-top: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  scroll-margin-top: 24px;
+}
+.prompt summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  list-style: none;
+}
+.prompt summary::-webkit-details-marker {
+  display: none;
+}
+.prompt-title {
+  font-weight: 700;
+}
+.prompt summary svg {
+  flex: none;
+  color: var(--ink-2);
+  transition: transform 0.2s ease;
+}
+.prompt[open] summary svg {
+  transform: rotate(180deg);
+}
+.prompt-text {
+  max-height: 420px;
+  overflow: auto;
+  margin: 0;
+  padding: 4px 14px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
 .limits {
   margin: 0;
   padding-left: 1.2rem;
@@ -1952,7 +2008,8 @@ h1[tabindex='-1']:focus {
 
 /* ---------- 12. Motion and transparency preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .skip-link {
+  .skip-link,
+  .prompt summary svg {
     transition: none;
   }
   .strip-track,
