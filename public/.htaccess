@@ -2,6 +2,11 @@
 Options -MultiViews
 RewriteEngine On
 
+# Send http to https (the X-Forwarded-Proto check avoids a loop behind a proxy)
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # Serve real files and folders as they are
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

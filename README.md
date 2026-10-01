@@ -71,7 +71,7 @@ Logos are resolved at build time: an official file in `public/logos/` first, the
 
 ## Deploy
 
-Deployed on Netlify: `netlify.toml` holds the build command, output folder, Node version and Space id, so every push to `main` publishes the site. The build is plain static files (`npm run build` → `dist/`), so any other static host works too. Routes use `#/…`, so no server rewrites are needed.
+The build is plain static files (`npm run build` → `dist/`, Node 20.19+ or 22.12+), served from the root of its domain. The public Space id is in `.env.production`, so the build needs no extra settings. On Hostinger (Apache / LiteSpeed), `public/.htaccess` ends up in `dist/` and redirects http to https. `netlify.toml` holds the same settings for Netlify. Routes use `#/…`, so no server rewrites are needed.
 
 ## Credits
 
