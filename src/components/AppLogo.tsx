@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import { logos } from 'virtual:logos'
 import { useApps } from '../lib/apps'
 
@@ -13,17 +12,17 @@ function isLight(hex: string) {
 interface Props {
   id: string
   size?: number
-  layoutId?: string
   className?: string
   /** No plate: the logo fills the whole size (for tiles that are already a light surface). */
   bare?: boolean
 }
 
 /**
- * Brand logo on a light plate (so dark brand colors stay visible in dark mode).
- * Simple Icons -> public/logos file -> name tile. Never a drawn logo.
+ * Brand logo, by default on a light plate (so dark brand colors stay visible in dark mode).
+ * Source order is decided at build time: hand-added file -> Simple Icons -> name tile.
+ * Never a drawn logo.
  */
-export function AppLogo({ id, size = 56, layoutId, className = '', bare = false }: Props) {
+export function AppLogo({ id, size = 56, className = '', bare = false }: Props) {
   const { name } = useApps()
   const logo = logos[id]
   // A near-white brand color (Snapchat yellow) would vanish on the light plate.
@@ -34,9 +33,17 @@ export function AppLogo({ id, size = 56, layoutId, className = '', bare = false 
   if (!logo && size < 40 && !bare) return null
 
   return (
-    <motion.span
-      layoutId={layoutId}
-      className={`logo-plate ${bare && logo && !dark ? 'is-bare' : ''} ${dark ? 'is-dark' : ''} ${logo ? '' : 'is-name'} ${!logo && (size >= 40 || bare) ? 'is-wide' : ''} ${className}`}
+    <span
+      className={[
+        'logo-plate',
+        bare && logo && !dark && 'is-bare',
+        dark && 'is-dark',
+        !logo && 'is-name',
+        !logo && (size >= 40 || bare) && 'is-wide',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{ width: size, height: size, borderRadius: size * 0.3 }}
       aria-hidden="true"
     >
@@ -56,6 +63,6 @@ export function AppLogo({ id, size = 56, layoutId, className = '', bare = false 
           {name(id)}
         </span>
       )}
-    </motion.span>
+    </span>
   )
 }

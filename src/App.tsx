@@ -1,12 +1,13 @@
-import { AnimatePresence, LayoutGroup, MotionConfig, motion, type Variants } from 'motion/react'
+import { AnimatePresence, MotionConfig, motion, type Variants } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { About } from './components/About'
+import { AppsProvider } from './components/AppsProvider'
 import { Background } from './components/Background'
 import { Home } from './components/Home'
 import { Splash } from './components/Splash'
-import { splitParts } from './components/Markdown'
+import { shortAnswerText } from './lib/answer'
 import { ask, connect } from './lib/api'
-import { AppsProvider, backendApp } from './lib/apps'
+import { backendApp } from './lib/apps'
 import { useTheme } from './lib/theme'
 import type { AskRequest, AskResponse, Entry } from './lib/types'
 
@@ -32,12 +33,10 @@ const blurViews: Variants = {
 
 const uid = () => Math.random().toString(36).slice(2, 10)
 
-/** Plain text of the short answer, for screen readers. */
+/** What screen readers hear when an answer arrives. */
 function announcement(data: AskResponse): string {
   if (data.type === 'error') return 'The AI service is busy. You can try again.'
-  const first = data.type === 'answer' ? splitParts(data.answer)[0] : data.answer
-  const plain = (first ?? '').replace(/\[[\d,\s]+\]/g, '').replace(/[*_#]/g, '').trim()
-  return `New answer. ${plain}`
+  return `New answer. ${shortAnswerText(data)}`
 }
 
 export default function App() {
@@ -48,15 +47,16 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [live, setLive] = useState('')
   const [splash, setSplash] = useState(true)
+  const busyRef = useRef(false)
+  const firstView = useRef(true)
+  // The previous answer's question and type, sent along so follow-ups keep their context.
+  const context = useRef({ question: '', type: '' })
 
   // The splash is a short intro, never a wait: it leaves on its own after ~2 s (or on tap).
   useEffect(() => {
     const t = setTimeout(() => setSplash(false), 2200)
     return () => clearTimeout(t)
   }, [])
-  const busyRef = useRef(false)
-  const firstView = useRef(true)
-  const context = useRef({ question: '', type: '' })
 
   // Wake the sleeping Space as early as possible.
   useEffect(() => {
@@ -164,26 +164,24 @@ export default function App() {
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {live}
         </div>
-        <LayoutGroup>
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.div key={view} className="view" variants={view === 'about' ? blurViews : views} initial="initial" animate="enter" exit="exit">
-              {view === 'home' && (
-                <Home
-                  theme={theme}
-                  onToggleTheme={toggle}
-                  entries={entries}
-                  focus={focus}
-                  busy={busy}
-                  onFocus={changeFocus}
-                  onSend={send}
-                  onRetry={retry}
-                  onAbout={() => go('about')}
-                />
-              )}
-              {view === 'about' && <About theme={theme} onToggleTheme={toggle} onBack={() => go('home')} />}
-            </motion.div>
-          </AnimatePresence>
-        </LayoutGroup>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div key={view} className="view" variants={view === 'about' ? blurViews : views} initial="initial" animate="enter" exit="exit">
+            {view === 'home' && (
+              <Home
+                theme={theme}
+                onToggleTheme={toggle}
+                entries={entries}
+                focus={focus}
+                busy={busy}
+                onFocus={changeFocus}
+                onSend={send}
+                onRetry={retry}
+                onAbout={() => go('about')}
+              />
+            )}
+            {view === 'about' && <About theme={theme} onToggleTheme={toggle} onBack={() => go('home')} />}
+          </motion.div>
+        </AnimatePresence>
       </AppsProvider>
     </MotionConfig>
   )

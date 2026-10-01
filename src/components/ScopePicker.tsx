@@ -3,11 +3,9 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import { logos } from 'virtual:logos'
 import { useApps } from '../lib/apps'
 import { quick, softSpring, spring } from '../lib/motion'
+import type { FocusOrigin } from '../lib/types'
 import { AppLogo } from './AppLogo'
 import { CloseIcon, GridIcon } from './icons'
-
-/** Where a focus choice came from (an app tile), so the chip can grow out of it. */
-export type FocusOrigin = { id: string; rect: DOMRect; at: number }
 
 interface Props {
   focus: string | null
@@ -15,8 +13,11 @@ interface Props {
   onChange: (id: string | null) => void
 }
 
-/** Scope under the search box: the focused app (logo, name, x) or "All N apps", plus "Change app". */
-export function FocusBar({ focus, origin, onChange }: Props) {
+/**
+ * What is being searched, under the search box: one pill showing the focused app (logo, name, ×)
+ * or "All N apps". Tapping it opens the app list, where "All apps" is the first option.
+ */
+export function ScopePicker({ focus, origin, onChange }: Props) {
   const { ids, name } = useApps()
   // Every app we offer, including Gmail and YouTube (they share Google's policies).
   const appCount = ids.length
@@ -53,7 +54,6 @@ export function FocusBar({ focus, origin, onChange }: Props) {
 
   return (
     <div className="focus-wrap" ref={wrap}>
-      {/* One pill: what is being searched. Tapping it opens the choice; "All apps" is one of the options. */}
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={focus ?? 'all'}

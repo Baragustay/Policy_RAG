@@ -1,12 +1,12 @@
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
+import { shortAnswerText, understoodQuestion } from '../lib/answer'
 import { useApps } from '../lib/apps'
 import { popSpring, softSpring, spring } from '../lib/motion'
-import type { Entry } from '../lib/types'
-import { AnswerCard, cardTitle } from './AnswerCard'
-import { FocusBar, type FocusOrigin } from './FocusBar'
+import type { Entry, FocusOrigin } from '../lib/types'
+import { AnswerCard } from './AnswerCard'
+import { ScopePicker } from './ScopePicker'
 import { ChevronIcon, SendIcon } from './icons'
-import { splitParts } from './Markdown'
 import { Squint, type Mood } from './Squint'
 
 interface Props {
@@ -22,12 +22,16 @@ interface Props {
 function examples(focus: string | null, name: (id: string) => string): string[] {
   if (focus) {
     const n = name(focus)
-    return [`Does ${n} use my content to train AI?`, `Does ${n} sell or share my data?`, `How long does ${n} keep my data after I delete my account?`]
+    return [
+      `Does ${n} use my content to train AI?`,
+      `Does ${n} sell or share my data?`,
+      `How long does ${n} keep my data after I delete my account?`,
+    ]
   }
   return ['Does Figma use my files to train AI?', 'Does TikTok sell my data?', 'Which keeps my data longer, Instagram or Snapchat?']
 }
 
-/** Squinty guides the search: happy when an answer is found (the worried face lives in the Watch out box). */
+/** Squinty's mood follows the newest answer. (The worried face lives in the Watch out box.) */
 function moodFor(entry: Entry | undefined): Mood {
   if (!entry) return 'idle'
   if (entry.status === 'loading' || !entry.data) return 'thinking'
@@ -45,42 +49,37 @@ const GUIDE: Record<Mood, string> = {
 // Tapping Squinty plays through his faces, then he settles back down.
 const PLAY: Mood[] = ['answer', 'thinking', 'watch', 'notfound']
 
-/** Plain text of an answer's short answer, for the collapsed Recent cards. */
-function shortAnswer(entry: Entry): string {
-  const d = entry.data
-  if (!d) return ''
-  const first = d.type === 'answer' ? splitParts(d.answer)[0] : d.answer
-  return (first ?? '')
-    .replace(/\*\*[^*]+:\*\*\s*/, '')
-    .replace(/\[[\d,\s]+\]/g, '')
-    .replace(/[*_#]/g, '')
-    .trim()
-}
-
 type Flight = { text: string; from: DOMRect; dx: number; dy: number }
 
-/** Scoped question-and-answer: a search box, the newest answer card, and a Recent stack. */
-export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry }: Props) {
+/**
+ * Scoped question and answer, all in one card: Squinty and the search box on top,
+ * the newest answer below, and earlier answers collapsed into Recent.
+ */
+export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry }: Props) {
   const { ids, name } = useApps()
   const reduced = useReducedMotion()
-  // Every app we offer, including Gmail and YouTube (they share Google's policies).
-  const appCount = ids.length
   const [draft, setDraft] = useState('')
   const [flight, setFlight] = useState<Flight | null>(null)
   const [openRecent, setOpenRecent] = useState<Set<string>>(new Set())
-  const input = useRef<HTMLTextAreaElement>(null)
-  const panel = useRef<HTMLElement>(null)
-  const flightTimer = useRef<number | undefined>(undefined)
   const [played, setPlayed] = useState<{ mood: Mood; i: number } | null>(null)
+  const [reservedHeight, setReservedHeight] = useState(460)
+  const card = useRef<HTMLElement>(null)
+  const input = useRef<HTMLTextAreaElement>(null)
+  const answerRef = useRef<HTMLDivElement>(null)
+  const lastAnswerHeight = useRef(0)
+  const flightTimer = useRef<number | undefined>(undefined)
   const playTimer = useRef<number | undefined>(undefined)
 
+  // Every app we offer, including Gmail and YouTube (they share Google's policies).
+  const appCount = ids.length
   const newest = entries[entries.length - 1]
+  const recent = entries.slice(0, -1).reverse()
+  const loading = newest?.status === 'loading'
+  const mood = played?.mood ?? moodFor(newest)
 
   // No layout shift while Squinty looks up an answer: the answer area keeps the height of the
   // last finished answer (or a typical answer's height for the first question) until the new one lands.
-  const answerRef = useRef<HTMLDivElement>(null)
-  const lastAnswerHeight = useRef(0)
-  const loading = newest?.status === 'loading'
+  const reserved = loading ? reservedHeight : undefined
   useLayoutEffect(() => {
     const el = answerRef.current
     if (!el || loading) return
@@ -90,10 +89,6 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
     ro.observe(el)
     return () => ro.disconnect()
   }, [newest?.id, loading])
-  const [reservedHeight, setReservedHeight] = useState(460)
-  const reserved = loading ? reservedHeight : undefined
-  const recent = entries.slice(0, -1).reverse()
-  const mood = played?.mood ?? moodFor(newest)
 
   const poke = () => {
     const i = played ? (played.i + 1) % PLAY.length : 0
@@ -103,11 +98,11 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
   }
   useEffect(() => () => window.clearTimeout(playTimer.current), [])
 
-  // A new question: bring the search panel to the top so its card sits right below it.
+  // A new question: bring the card to the top so the answer sits right below the search box.
   const count = useRef(entries.length)
   useEffect(() => {
-    if (entries.length > count.current && panel.current) {
-      window.scrollTo({ top: panel.current.getBoundingClientRect().top + window.scrollY - 12, behavior: reduced ? 'auto' : 'smooth' })
+    if (entries.length > count.current && card.current) {
+      window.scrollTo({ top: card.current.getBoundingClientRect().top + window.scrollY - 12, behavior: reduced ? 'auto' : 'smooth' })
     }
     count.current = entries.length
   }, [entries.length, reduced])
@@ -168,9 +163,8 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
     })
 
   return (
-    <div className="qa">
-      {/* One card: the question on top, its answer and earlier answers below. */}
-      <section ref={panel} className="qa-card glass-solid" aria-labelledby="ask-title">
+    <>
+      <section ref={card} className="qa-card glass-solid" aria-labelledby="ask-title">
         <h2 className="sr-only" id="ask-title">
           Ask about an app's privacy or terms
         </h2>
@@ -185,7 +179,15 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
               </p>
             ) : (
               <AnimatePresence mode="wait" initial={false}>
-                <motion.p key={mood} className="guide guide-small" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} aria-hidden="true">
+                <motion.p
+                  key={mood}
+                  className="guide guide-small"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  aria-hidden="true"
+                >
                   {GUIDE[mood]}
                 </motion.p>
               </AnimatePresence>
@@ -220,7 +222,7 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
             </form>
 
             <div className="scope-row">
-              <FocusBar focus={focus} origin={focusOrigin} onChange={onFocus} />
+              <ScopePicker focus={focus} origin={focusOrigin} onChange={onFocus} />
               <p className="note">Questions are not stored.</p>
             </div>
 
@@ -250,7 +252,15 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <AnswerCard entry={newest} showQuestion={draft !== newest.message} isLatest busy={busy || !!flight} onRetry={() => onRetry(newest.id)} onSend={(t) => ask(t)} onFollowup={followup} />
+              <AnswerCard
+                entry={newest}
+                isLatest
+                showQuestion={draft !== newest.message}
+                busy={busy || !!flight}
+                onRetry={() => onRetry(newest.id)}
+                onSend={ask}
+                onFollowup={followup}
+              />
             </motion.div>
           )}
 
@@ -264,10 +274,16 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
                   const isOpen = openRecent.has(entry.id)
                   return (
                     <motion.li key={entry.id} layoutId={`entry-${entry.id}`} className="recent-card" transition={softSpring}>
-                      <button type="button" className="recent-head" aria-expanded={isOpen} aria-controls={`recent-${entry.id}`} onClick={() => toggleRecent(entry.id)}>
+                      <button
+                        type="button"
+                        className="recent-head"
+                        aria-expanded={isOpen}
+                        aria-controls={`recent-${entry.id}`}
+                        onClick={() => toggleRecent(entry.id)}
+                      >
                         <span className="recent-text">
-                          <span className="recent-q">{cardTitle(entry)}</span>
-                          {!isOpen && <span className="recent-a">{shortAnswer(entry)}</span>}
+                          <span className="recent-q">{understoodQuestion(entry)}</span>
+                          {!isOpen && <span className="recent-a">{entry.data && shortAnswerText(entry.data)}</span>}
                         </span>
                         <motion.span className="chev" animate={{ rotate: isOpen ? 180 : 0 }} transition={softSpring} aria-hidden="true">
                           <ChevronIcon />
@@ -283,7 +299,14 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ height: softSpring, opacity: { duration: 0.2 } }}
                           >
-                            <AnswerCard entry={entry} isLatest={false} busy={busy} onRetry={() => onRetry(entry.id)} onSend={(t) => ask(t)} onFollowup={followup} />
+                            <AnswerCard
+                              entry={entry}
+                              isLatest={false}
+                              busy={busy}
+                              onRetry={() => onRetry(entry.id)}
+                              onSend={ask}
+                              onFollowup={followup}
+                            />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -308,6 +331,6 @@ export function Chat({ entries, focus, focusOrigin, busy, onFocus, onSend, onRet
           {flight.text}
         </motion.div>
       )}
-    </div>
+    </>
   )
 }

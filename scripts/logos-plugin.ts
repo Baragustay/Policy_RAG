@@ -5,7 +5,7 @@ import type { Plugin } from 'vite'
 
 type SimpleIcon = { slug: string; title: string; hex: string; path: string }
 type AppEntry = { name: string; slug: string | null; policyApp?: string }
-export type LogoInfo =
+type LogoInfo =
   | { source: 'simple-icons'; title: string; hex: string; path: string }
   | { source: 'file'; src: string }
 

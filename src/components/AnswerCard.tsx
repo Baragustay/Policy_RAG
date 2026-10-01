@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion/react'
 import { useState } from 'react'
 import { logos } from 'virtual:logos'
+import { normalizeBullets, sourceDomId, splitParts, understoodQuestion } from '../lib/answer'
 import { backendApp, useApps } from '../lib/apps'
 import { docLabel } from '../lib/format'
 import { popSpring, softSpring } from '../lib/motion'
@@ -8,8 +9,8 @@ import type { AskResponse, Entry } from '../lib/types'
 import { AppLogo } from './AppLogo'
 import { AlertIcon } from './icons'
 import { LoadingBody } from './LoadingBody'
-import { Markdown, normalizeBullets, splitParts } from './Markdown'
-import { sourceDomId, Sources } from './Sources'
+import { Markdown } from './Markdown'
+import { Sources } from './Sources'
 import { Squint } from './Squint'
 
 const body: Variants = {
@@ -25,9 +26,6 @@ const chip: Variants = {
   hidden: { opacity: 0, scale: 0.6 },
   show: { opacity: 1, scale: 1, transition: popSpring },
 }
-
-/** The question the backend understood (after rewriting), or what was typed. */
-export const cardTitle = (entry: Entry) => (entry.data?.rewritten && entry.data.type !== 'error' ? entry.data.question : entry.message)
 
 interface Props {
   entry: Entry
@@ -45,16 +43,25 @@ interface Props {
  * so the answer has no title of its own; a rewritten follow-up says how it was understood.
  */
 export function AnswerCard({ entry, isLatest, busy, onRetry, onSend, onFollowup, showQuestion = false }: Props) {
-  const understood = entry.data?.rewritten && entry.data.type !== 'error' ? entry.data.question : null
+  const understood = understoodQuestion(entry)
   return (
-    <div className={`answer type-${entry.data?.type ?? 'loading'}`} aria-busy={entry.status === 'loading'}>
+    <div className="answer" aria-busy={entry.status === 'loading'}>
       {showQuestion && <p className="asked">Your question: {entry.message}</p>}
-      {understood && <p className="asked">Understood as: {understood}</p>}
+      {understood !== entry.message && <p className="asked">Understood as: {understood}</p>}
       <AnimatePresence mode="wait" initial={false}>
         {entry.status === 'loading' || !entry.data ? (
           <LoadingBody key="loading" />
         ) : (
-          <AnswerBody key="body" id={entry.id} data={entry.data} isLatest={isLatest} busy={busy} onRetry={onRetry} onSend={onSend} onFollowup={onFollowup} />
+          <AnswerBody
+            key="body"
+            id={entry.id}
+            data={entry.data}
+            isLatest={isLatest}
+            busy={busy}
+            onRetry={onRetry}
+            onSend={onSend}
+            onFollowup={onFollowup}
+          />
         )}
       </AnimatePresence>
     </div>

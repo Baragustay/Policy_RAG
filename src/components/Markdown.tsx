@@ -4,7 +4,7 @@ import remarkBreaks from 'remark-breaks'
 
 const CITE = /\[(\d+(?:\s*,\s*\d+)*)\]/g
 
-export type CiteRenderer = (num: number, key: string) => ReactNode
+type CiteRenderer = (num: number, key: string) => ReactNode
 
 /** Splits "[2, 4]" inside text into citation buttons (only for sources we actually have). */
 function withCites(children: ReactNode, renderCite?: CiteRenderer): ReactNode {
@@ -58,15 +58,4 @@ export function Markdown({ text, renderCite }: { text: string; renderCite?: Cite
       {text}
     </ReactMarkdown>
   )
-}
-
-/** "• item" lines from the backend become real markdown list items. */
-export const normalizeBullets = (text: string) => text.replace(/^[ \t]*•[ \t]?/gm, '- ')
-
-/** Splits the answer into its labelled parts (Short answer / What this means / Watch out). */
-export function splitParts(answer: string): string[] {
-  return normalizeBullets(answer)
-    .split(/\n+(?=\*\*[^*\n]{2,60}:\*\*)/)
-    .map((p) => p.trim())
-    .filter(Boolean)
 }

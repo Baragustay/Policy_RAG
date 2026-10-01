@@ -26,6 +26,9 @@ export interface AskResponse {
   followups: string[]
 }
 
+/** Where a focus choice came from (a logo in the hero), so the scope pill can grow out of it. */
+export type FocusOrigin = { id: string; rect: DOMRect; at: number }
+
 /** One question and its answer card. Kept in memory only. */
 export interface Entry {
   id: string

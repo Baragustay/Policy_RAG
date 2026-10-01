@@ -1,11 +1,11 @@
 import { motion } from 'motion/react'
+import { useFitText } from '../lib/hooks'
 import { softSpring } from '../lib/motion'
-import { useFitText } from './SplitHero'
 import { Squint } from './Squint'
 
-/** Short intro shown on load: Squint, the name and the promise. Tap to skip. */
+/** Short intro shown on load: Squinty, the name and the promise. Tap to skip. */
 export function Splash({ onDone }: { onDone: () => void }) {
-  const titleRef = useFitText<HTMLSpanElement>(150)
+  const { ref: titleRef } = useFitText<HTMLSpanElement>(150)
 
   return (
     <motion.div

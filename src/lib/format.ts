@@ -1,3 +1,5 @@
+import { normalizeBullets } from './answer'
+
 /** "privacy" -> "Privacy policy", "terms-eu-new" -> "Terms of service (EU, new)" */
 export function docLabel(doc: string): string {
   const [base, ...rest] = doc.toLowerCase().split('-')
@@ -22,7 +24,7 @@ export function excerpt(text: string): string {
   let t = text.trim()
   if (/^[a-z,;)]/.test(t)) t = '…' + t
   if (!/[.!?:)"”]$/.test(t)) t = t + '…'
-  return t.replace(/^\s*•\s?/gm, '- ')
+  return normalizeBullets(t)
 }
 
 function capitalize(s: string) {

@@ -1,44 +1,9 @@
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useApps } from '../lib/apps'
+import { useFitText, useMedia } from '../lib/hooks'
 import { AppLogo } from './AppLogo'
 import { GridIcon } from './icons'
-
-function useMedia(query: string) {
-  const [match, setMatch] = useState(() => window.matchMedia(query).matches)
-  useEffect(() => {
-    const m = window.matchMedia(query)
-    const on = () => setMatch(m.matches)
-    m.addEventListener('change', on)
-    return () => m.removeEventListener('change', on)
-  }, [query])
-  return match
-}
-
-/** Sizes a single line of text to fill its container's width, up to `max` px. */
-export function useFitText<T extends HTMLElement>(max: number) {
-  const ref = useRef<T>(null)
-  useLayoutEffect(() => {
-    const el = ref.current
-    const box = el?.parentElement
-    if (!el || !box) return
-    const fit = () => {
-      el.style.fontSize = '100px'
-      const w = el.scrollWidth
-      if (!w) return
-      const size = `${Math.min(max, (100 * box.clientWidth) / w)}px`
-      el.style.fontSize = size
-      // The lower half is a second copy of the same word; keep it identical.
-      box.closest('.split-title')?.querySelectorAll<HTMLElement>('.split-copy').forEach((c) => (c.style.fontSize = size))
-    }
-    fit()
-    document.fonts?.ready.then(fit).catch(() => {})
-    const ro = new ResizeObserver(fit)
-    ro.observe(box)
-    return () => ro.disconnect()
-  }, [max])
-  return ref
-}
 
 interface Props {
   focus: string | null
@@ -48,14 +13,14 @@ interface Props {
 
 /**
  * "The split": the title is cut in half horizontally and opens to reveal the subheading.
- * Below it, a filmstrip of app logos; tapping one starts a chat about that app.
+ * Below it, a filmstrip of app logos; tapping one focuses the search on that app.
  */
 export function SplitHero({ focus, onPick, onPickAll }: Props) {
   const { ids, name } = useApps()
   const reduced = useReducedMotion()
-  // Kept modest so the chat stays the main thing on the page.
   const word = 'Policy Translator'
-  const splitRef = useFitText<HTMLSpanElement>(64)
+  // Capped at 64px so the search stays the main thing on the page.
+  const { ref: splitRef, size: splitSize } = useFitText<HTMLSpanElement>(64)
 
   // Page scroll nudges the strip sideways, on top of its own slow drift.
   const { scrollY } = useScroll()
@@ -199,14 +164,14 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
               </span>
             </motion.span>
             <motion.span className="split-half bottom" style={{ y: bottomY }} aria-hidden="true">
-              <span className="split-word split-copy">{word}</span>
+              <span className="split-word" style={{ fontSize: splitSize }}>
+                {word}
+              </span>
             </motion.span>
           </h1>
           {/* Always exactly two lines: each line is kept whole and the size scales with the screen. */}
           <motion.p ref={subRef} className="split-sub" style={{ opacity: subOpacity, scale: subScale }}>
-            <span className="line">
-              Policies explained in plain English,
-            </span>{' '}
+            <span className="line">Policies explained in plain English,</span>{' '}
             <span className="line">so you understand what you agree to.</span>
           </motion.p>
         </div>
@@ -235,29 +200,35 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
         {/* Fixed in the middle: apps slide behind it through a soft blur. */}
         <div className="strip-center" aria-hidden="true" />
         <div className="strip-all-pos">
-        <motion.button
-          type="button"
-          className={`strip-tile strip-all ${focus === null ? 'is-on' : ''}`}
-          aria-pressed={focus === null}
-          aria-label="Ask about all apps"
-          onClick={onPickAll}
-          whileTap={{ scale: 0.92 }}
-        >
-          <span className="all-icon" aria-hidden="true">
-            <GridIcon size={18} />
-          </span>
-          <span className="strip-name">All apps</span>
-        </motion.button>
+          <motion.button
+            type="button"
+            className={`strip-tile strip-all ${focus === null ? 'is-on' : ''}`}
+            aria-pressed={focus === null}
+            aria-label="Ask about all apps"
+            onClick={onPickAll}
+            whileTap={{ scale: 0.92 }}
+          >
+            <span className="all-icon" aria-hidden="true">
+              <GridIcon size={18} />
+            </span>
+            <span className="strip-name">All apps</span>
+          </motion.button>
         </div>
       </div>
-
 
       {/* Same as the logos: each name starts a search about that app. */}
       <p className="app-names">
         <span className="app-names-label">Apps covered: </span>
         {ids.map((id, i) => (
           <span key={id}>
-            <button type="button" className={`app-name-link ${focus === id ? 'is-on' : ''}`} data-label={name(id)} aria-pressed={focus === id} aria-label={`Ask about ${name(id)}`} onClick={(e) => onPick(id, e.currentTarget)}>
+            <button
+              type="button"
+              className={`app-name-link ${focus === id ? 'is-on' : ''}`}
+              data-label={name(id)}
+              aria-pressed={focus === id}
+              aria-label={`Ask about ${name(id)}`}
+              onClick={(e) => onPick(id, e.currentTarget)}
+            >
               {name(id)}
             </button>
             {i < ids.length - 1 && <span aria-hidden="true"> · </span>}

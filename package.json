@@ -1,13 +1,15 @@
 {
   "name": "policy-translator",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Plain-language answers about the privacy policies and terms of popular apps, with the original text one tap away.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "lint": "oxlint"
   },
   "dependencies": {
     "@gradio/client": "^2.7.1",

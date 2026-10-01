@@ -6,7 +6,7 @@ import thinking from '../assets/squint/thinking.svg?raw'
 import watch from '../assets/squint/watch.svg?raw'
 import { popSpring } from '../lib/motion'
 
-/** Squint, the app's mascot. Moods mirror app states; answer text stays neutral. */
+/** Squinty, the app's mascot. Moods mirror app states; answer text stays neutral. */
 export type Mood = 'idle' | 'thinking' | 'answer' | 'watch' | 'notfound'
 
 // Artwork from "Squint character sheet.html", used as-is. Inlined so the eyes can blink.
@@ -18,6 +18,7 @@ interface Props {
   className?: string
 }
 
+/** Squinty in one of his moods; switching mood pops the new face in. */
 export function Squint({ mood, size = 64, className = '' }: Props) {
   return (
     <span className={`squint mood-${mood} ${className}`} style={{ width: size, height: size * 1.1 }} aria-hidden="true">

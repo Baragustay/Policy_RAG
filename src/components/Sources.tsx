@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { logos } from 'virtual:logos'
+import { sourceDomId } from '../lib/answer'
 import { useApps } from '../lib/apps'
 import { docLabel, excerpt, sectionLabel } from '../lib/format'
 import { softSpring } from '../lib/motion'
@@ -15,8 +16,6 @@ interface Props {
   flash: number | null
   onToggle: (num: number) => void
 }
-
-export const sourceDomId = (msgId: string, num: number) => `src-${msgId}-${num}`
 
 export function Sources({ msgId, sources, open, flash, onToggle }: Props) {
   const { name } = useApps()
