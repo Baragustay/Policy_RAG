@@ -1,0 +1,99 @@
+{
+  "_comment": "App id (from /list_apps) -> Simple Icons slug. Names are only a fallback until /list_apps answers. A file in public/logos/{id}.svg|png|webp wins over Simple Icons. 'policyApp' marks a UI-only app that asks the backend as another app (same policies).",
+  "apps": {
+    "adobe": {
+      "name": "Adobe",
+      "slug": "adobe"
+    },
+    "anthropic": {
+      "name": "Claude",
+      "slug": "claude"
+    },
+    "canva": {
+      "name": "Canva",
+      "slug": "canva"
+    },
+    "discord": {
+      "name": "Discord",
+      "slug": "discord"
+    },
+    "facebook": {
+      "name": "Facebook",
+      "slug": "facebook"
+    },
+    "figma": {
+      "name": "Figma",
+      "slug": "figma"
+    },
+    "google": {
+      "name": "Google",
+      "slug": "google"
+    },
+    "gmail": {
+      "name": "Gmail",
+      "slug": "gmail",
+      "policyApp": "google"
+    },
+    "youtube": {
+      "name": "YouTube",
+      "slug": "youtube",
+      "policyApp": "google"
+    },
+    "instagram": {
+      "name": "Instagram",
+      "slug": "instagram"
+    },
+    "linkedin": {
+      "name": "LinkedIn",
+      "slug": "linkedin"
+    },
+    "lovable": {
+      "name": "Lovable",
+      "slug": "lovable"
+    },
+    "miro": {
+      "name": "Miro",
+      "slug": "miro"
+    },
+    "openai": {
+      "name": "ChatGPT",
+      "slug": "openai"
+    },
+    "pinterest": {
+      "name": "Pinterest",
+      "slug": "pinterest"
+    },
+    "reddit": {
+      "name": "Reddit",
+      "slug": "reddit"
+    },
+    "slack": {
+      "name": "Slack",
+      "slug": "slack"
+    },
+    "snapchat": {
+      "name": "Snapchat",
+      "slug": "snapchat"
+    },
+    "spotify": {
+      "name": "Spotify",
+      "slug": "spotify"
+    },
+    "suno": {
+      "name": "Suno",
+      "slug": "suno"
+    },
+    "tiktok": {
+      "name": "TikTok",
+      "slug": "tiktok"
+    },
+    "whatsapp": {
+      "name": "WhatsApp",
+      "slug": "whatsapp"
+    },
+    "x": {
+      "name": "X",
+      "slug": "x"
+    }
+  }
+}
