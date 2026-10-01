@@ -68,7 +68,7 @@ Logos are resolved at build time: an official file in `public/logos/` first, the
 
 ## Deploy
 
-The build is plain static files (`npm run build` → `dist/`) and can be hosted anywhere, such as Netlify or any web host. Set `VITE_HF_SPACE` in the host's build environment. Routes use `#/…`, so no server rewrites are needed.
+Deployed on Netlify: `netlify.toml` holds the build command, output folder, Node version and Space id, so every push to `main` publishes the site. The build is plain static files (`npm run build` → `dist/`), so any other static host works too. Routes use `#/…`, so no server rewrites are needed.
 
 ## Credits
 
