@@ -649,7 +649,10 @@ h1[tabindex='-1']:focus {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: 8px 0;
+  /* A sideways-scrolling box also clips vertically, so it needs room for the tiles' full shadow
+     (about 26px below). The negative margins give that room back, so nothing else moves. */
+  padding: 28px 0;
+  margin: -20px 0;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
@@ -778,8 +781,9 @@ h1[tabindex='-1']:focus {
 .strip-center {
   position: absolute;
   z-index: 3;
-  top: 0;
-  bottom: 0;
+  /* Same 20px as the strip's extra shadow padding, so the blur stays on the tiles' row. */
+  top: 20px;
+  bottom: 20px;
   left: 50%;
   width: calc(var(--tile) * 4.6 + 60px);
   transform: translateX(-50%);
@@ -819,6 +823,9 @@ h1[tabindex='-1']:focus {
 
 /* Plain-text list of apps; each name works like its logo and turns bold on hover. */
 .app-names {
+  /* Above the strip, whose shadow padding reaches over the first line of names. */
+  position: relative;
+  z-index: 5;
   max-width: 820px;
   margin: 4px auto 0;
   padding: 0 8px;
