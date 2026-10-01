@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import { Footer } from './Footer'
 import { BackIcon } from './icons'
+import { Squint } from './Squint'
 import { ThemeToggle } from './ThemeToggle'
 
 /** How it works, step by step. Text by Barbora, used as written. */
@@ -126,12 +127,20 @@ export function About({ theme, onToggleTheme, onBack }: { theme: Theme; onToggle
 
       <main className="about-grid">
         <section className="glass-solid about-card about-intro">
-          <h1 className="display" tabIndex={-1}>
-            About this app
-          </h1>
-          <p className="lede">
-            Privacy policies are long on purpose. This app reads them for you and explains them in plain language, with the original text one tap away.
-          </p>
+          <div className="about-intro-text">
+            <h1 className="display" tabIndex={-1}>
+              About this app
+            </h1>
+            <p className="lede">
+              Privacy policies are long on purpose. Squinty reads them for you and explains them in plain language, with the original text one tap away.
+            </p>
+          </div>
+          {/* Squinty sits centred in the free space on wider screens; hidden on phones to keep the card short. */}
+          <div className="about-squint" aria-hidden="true">
+            <span className="about-squint-tip" data-tip="Hi! I'm Squinty. I read the policies so you don't have to.">
+              <Squint mood="idle" size={150} />
+            </span>
+          </div>
         </section>
 
         <section className="glass-solid about-card about-how">
