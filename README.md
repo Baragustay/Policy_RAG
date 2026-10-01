@@ -68,7 +68,7 @@ Logos are resolved at build time: an official file in `public/logos/` first, the
 
 ## Deploy
 
-The build is plain static files and can be hosted anywhere. See [DEPLOY.md](DEPLOY.md) for Hostinger steps.
+The build is plain static files (`npm run build` → `dist/`) and can be hosted anywhere, such as Netlify or any web host. Set `VITE_HF_SPACE` in the host's build environment. Routes use `#/…`, so no server rewrites are needed.
 
 ## Credits
 

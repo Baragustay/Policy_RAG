@@ -6,7 +6,11 @@
     <title>Policy Translator</title>
     <meta name="description" content="Privacy policies and terms of popular apps, explained in plain language, with the original text one tap away." />
     <meta name="theme-color" content="#dfe3ed" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <!-- Squinty: SVG for modern browsers, PNG fallback (Safari), and the iOS home-screen icon.
+         Not named favicon.* so browsers never reuse the old cached Vite icon. -->
+    <link rel="icon" type="image/svg+xml" href="./squinty-icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./squinty-icon-32.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
