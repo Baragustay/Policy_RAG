@@ -1528,7 +1528,7 @@ h1[tabindex='-1']:focus {
   cursor: default;
 }
 /* A longer message: wraps onto two lines so it stays on screen next to the card edge.
-   Sits just under Squinty's floor shadow, and waits a moment before appearing. */
+   Sits just under Squinty's floor shadow. */
 .about-squint-tip[data-tip]::before {
   top: calc(100% - 10px);
   width: max-content;
@@ -1536,10 +1536,8 @@ h1[tabindex='-1']:focus {
   white-space: normal;
   text-align: center;
   line-height: 1.35;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.about-squint-tip[data-tip]:hover::before {
-  transition-delay: 0.5s;
+  /* No wait: a soft fade-in with a small rise. */
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 @media (max-width: 639px) {
   .about-squint {
