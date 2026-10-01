@@ -880,17 +880,6 @@ h1[tabindex='-1']:focus {
   flex: 1;
   min-width: 0;
 }
-.squint-btn {
-  flex: none;
-  padding: 0;
-  border: 0;
-  border-radius: 20px;
-  background: none;
-  transition: transform 0.15s;
-}
-.squint-btn:active {
-  transform: scale(0.92);
-}
 .guide {
   margin: 4px 0 12px;
   font-family: var(--font-display);
@@ -1523,22 +1512,6 @@ h1[tabindex='-1']:focus {
   display: flex;
   justify-content: center;
 }
-.about-squint-tip {
-  display: inline-flex;
-  cursor: default;
-}
-/* A longer message: wraps onto two lines so it stays on screen next to the card edge.
-   Sits just under Squinty's floor shadow. */
-.about-squint-tip[data-tip]::before {
-  top: calc(100% - 10px);
-  width: max-content;
-  max-width: 180px;
-  white-space: normal;
-  text-align: center;
-  line-height: 1.35;
-  /* No wait: a soft fade-in with a small rise. */
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-}
 @media (max-width: 639px) {
   .about-squint {
     display: none;
@@ -1752,6 +1725,34 @@ h1[tabindex='-1']:focus {
 [data-tip]:focus-visible::before {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+/* Squinty's hover hello: a longer message, so it wraps onto two lines and sits just under
+   his floor shadow. No wait: a soft fade-in with a small rise. */
+.squinty-hello {
+  display: inline-flex;
+  flex: none;
+  cursor: default;
+}
+.squinty-hello[data-tip]::before {
+  top: calc(100% - 8px);
+  width: max-content;
+  max-width: 190px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.35;
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+/* Near a left edge: the bubble opens to the right from the element's left side. */
+[data-tip-align='start']::before {
+  left: 0;
+  transform: translateY(-4px);
+}
+[data-tip-align='start']:hover::before,
+[data-tip-align='start']:focus-visible::before {
+  transform: none;
+}
+.squinty-hello[data-tip-align='start']::before {
+  text-align: left;
 }
 /* Near the right edge: align the bubble to the element's right side. */
 [data-tip-align='end']::before {

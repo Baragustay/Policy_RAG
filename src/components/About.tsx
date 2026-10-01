@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import { Footer } from './Footer'
 import { BackIcon } from './icons'
-import { Squint } from './Squint'
+import { HelloSquinty } from './Squint'
 import { ThemeToggle } from './ThemeToggle'
 
 /** How it works, step by step. Text by Barbora, used as written. */
@@ -137,9 +137,7 @@ export function About({ theme, onToggleTheme, onBack }: { theme: Theme; onToggle
           </div>
           {/* Squinty sits centred in the free space on wider screens; hidden on phones to keep the card short. */}
           <div className="about-squint" aria-hidden="true">
-            <span className="about-squint-tip" data-tip="Hi! I'm Squinty. I read the policies so you don't have to.">
-              <Squint mood="idle" size={150} />
-            </span>
+            <HelloSquinty mood="idle" size={150} />
           </div>
         </section>
 

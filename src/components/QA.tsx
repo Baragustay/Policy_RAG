@@ -7,7 +7,7 @@ import type { Entry, FocusOrigin } from '../lib/types'
 import { AnswerCard } from './AnswerCard'
 import { ScopePicker } from './ScopePicker'
 import { ChevronIcon, SendIcon } from './icons'
-import { Squint, type Mood } from './Squint'
+import { HelloSquinty, type Mood } from './Squint'
 
 interface Props {
   entries: Entry[]
@@ -46,9 +46,6 @@ const GUIDE: Record<Mood, string> = {
   notfound: "Hmm, that one's tricky. See below.",
 }
 
-// Tapping Squinty plays through his faces, then he settles back down.
-const PLAY: Mood[] = ['answer', 'thinking', 'watch', 'notfound']
-
 type Flight = { text: string; from: DOMRect; dx: number; dy: number }
 
 /**
@@ -61,21 +58,19 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
   const [draft, setDraft] = useState('')
   const [flight, setFlight] = useState<Flight | null>(null)
   const [openRecent, setOpenRecent] = useState<Set<string>>(new Set())
-  const [played, setPlayed] = useState<{ mood: Mood; i: number } | null>(null)
   const [reservedHeight, setReservedHeight] = useState(460)
   const card = useRef<HTMLElement>(null)
   const input = useRef<HTMLTextAreaElement>(null)
   const answerRef = useRef<HTMLDivElement>(null)
   const lastAnswerHeight = useRef(0)
   const flightTimer = useRef<number | undefined>(undefined)
-  const playTimer = useRef<number | undefined>(undefined)
 
   // Every app we offer, including Gmail and YouTube (they share Google's policies).
   const appCount = ids.length
   const newest = entries[entries.length - 1]
   const recent = entries.slice(0, -1).reverse()
   const loading = newest?.status === 'loading'
-  const mood = played?.mood ?? moodFor(newest)
+  const mood = moodFor(newest)
 
   // No layout shift while Squinty looks up an answer: the answer area keeps the height of the
   // last finished answer (or a typical answer's height for the first question) until the new one lands.
@@ -90,13 +85,6 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
     return () => ro.disconnect()
   }, [newest?.id, loading])
 
-  const poke = () => {
-    const i = played ? (played.i + 1) % PLAY.length : 0
-    setPlayed({ mood: PLAY[i], i })
-    window.clearTimeout(playTimer.current)
-    playTimer.current = window.setTimeout(() => setPlayed(null), 2200)
-  }
-  useEffect(() => () => window.clearTimeout(playTimer.current), [])
 
   // A new question: bring the card to the top so the answer sits right below the search box.
   const count = useRef(entries.length)
@@ -185,9 +173,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
           Ask about an app's privacy or terms
         </h2>
         <div className="ask-row">
-          <button type="button" className="squint-btn" onClick={poke} aria-label="Squinty, the guide. Tap to play">
-            <Squint mood={mood} size={64} className="ask-squint" />
-          </button>
+          <HelloSquinty mood={mood} size={64} className="ask-squint" align="start" />
           <div className="ask-main">
             {entries.length === 0 ? (
               <p className="guide">
