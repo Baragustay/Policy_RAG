@@ -36,17 +36,28 @@ interface Props {
   onFollowup: (text: string, from: HTMLElement) => void
   /** When the search field no longer shows this question, name it quietly above the answer. */
   showQuestion?: boolean
+  /** Puts this question back into the search field to edit it. */
+  onEdit?: () => void
 }
 
 /**
  * The answer to one question. The question itself stays in the search field above,
  * so the answer has no title of its own; a rewritten follow-up says how it was understood.
  */
-export function AnswerCard({ entry, isLatest, busy, onRetry, onSend, onFollowup, showQuestion = false }: Props) {
+export function AnswerCard({ entry, isLatest, busy, onRetry, onSend, onFollowup, showQuestion = false, onEdit }: Props) {
   const understood = understoodQuestion(entry)
   return (
     <div className="answer" aria-busy={entry.status === 'loading'}>
-      {showQuestion && <p className="asked">Your question: {entry.message}</p>}
+      {showQuestion && (
+        <p className="asked">
+          Your question: {entry.message}
+          {onEdit && (
+            <button type="button" className="asked-edit" onClick={onEdit}>
+              Edit<span className="sr-only"> this question</span>
+            </button>
+          )}
+        </p>
+      )}
       {understood !== entry.message && <p className="asked">Understood as: {understood}</p>}
       <AnimatePresence mode="wait" initial={false}>
         {entry.status === 'loading' || !entry.data ? (

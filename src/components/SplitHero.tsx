@@ -26,24 +26,25 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
   const { scrollY } = useScroll()
   const drift = useSpring(useTransform(scrollY, [0, 800], [0, -220]), { stiffness: 120, damping: 30 })
 
-  // The title is whole until hovered, then splits open to reveal the subheading and
-  // closes again when the pointer leaves. Reduced motion keeps it open.
-  const [cycleOpen, setCycleOpen] = useState(false)
-  const [hovered, setHovered] = useState(false)
-  const firstOpen = useRef(true)
-  // Mouse users open it by hovering; touch screens have no hover, so they get the timed cycle.
+  // The title starts whole, then splits open to reveal the subheading.
+  // Mouse: it opens once by itself shortly after load (so first-time visitors see the promise),
+  // closes, and from then on opens on hover. Touch: it opens once and stays open, so nothing
+  // keeps moving. Reduced motion: always open.
   const hoverOnly = useMedia('(hover: hover) and (pointer: fine)')
-  const held = !!reduced || hovered
-  const isOpen = held || (!hoverOnly && cycleOpen)
+  const [hovered, setHovered] = useState(false)
+  const [phase, setPhase] = useState<'closed' | 'intro' | 'settled'>('closed')
   useEffect(() => {
-    if (held || hoverOnly) return
-    const delay = cycleOpen ? 7000 : firstOpen.current ? 2600 : 4000
-    const t = setTimeout(() => {
-      firstOpen.current = false
-      setCycleOpen((o) => !o)
-    }, delay)
-    return () => clearTimeout(t)
-  }, [cycleOpen, held, hoverOnly])
+    if (reduced) return
+    if (phase === 'closed') {
+      const t = setTimeout(() => setPhase('intro'), 3000)
+      return () => clearTimeout(t)
+    }
+    if (phase === 'intro' && hoverOnly) {
+      const t = setTimeout(() => setPhase('settled'), 4500)
+      return () => clearTimeout(t)
+    }
+  }, [phase, hoverOnly, reduced])
+  const isOpen = !!reduced || hovered || phase === 'intro' || (!hoverOnly && phase !== 'closed')
   const openSpring = useSpring(isOpen ? 1 : 0, { stiffness: 120, damping: 20 })
   useEffect(() => openSpring.set(isOpen ? 1 : 0), [isOpen, openSpring])
   const topY = useTransform(openSpring, (v) => `calc(var(--gap) * ${-0.5 * v})`)
@@ -65,12 +66,27 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
     return () => ro.disconnect()
   }, [])
 
-  // Hover the strip to take over: drag with the mouse, or scroll it with the wheel or trackpad.
+  // The strip can be dragged with the mouse; trackpads, Shift+wheel and touch scroll it natively.
+  // (The plain wheel is left alone so it always scrolls the page.)
   const stripRef = useRef<HTMLDivElement>(null)
   const drag = useRef({ x: 0, left: 0, moved: false, active: false })
   const [dragging, setDragging] = useState(false)
 
+  // Touching the strip pauses it (touch screens have no hover), and it stays still for a moment after.
+  const [touchHeld, setTouchHeld] = useState(false)
+  const releaseTimer = useRef<number | undefined>(undefined)
+  const holdForTouch = () => {
+    window.clearTimeout(releaseTimer.current)
+    setTouchHeld(true)
+  }
+  const releaseTouch = () => {
+    window.clearTimeout(releaseTimer.current)
+    releaseTimer.current = window.setTimeout(() => setTouchHeld(false), 3000)
+  }
+  useEffect(() => () => window.clearTimeout(releaseTimer.current), [])
+
   const onPointerDown = (e: ReactPointerEvent) => {
+    if (e.pointerType === 'touch') holdForTouch()
     if (e.pointerType !== 'mouse' || e.button !== 0 || !stripRef.current) return
     drag.current = { x: e.clientX, left: stripRef.current.scrollLeft, moved: false, active: true }
   }
@@ -84,26 +100,11 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
     }
     if (d.moved) stripRef.current.scrollLeft = d.left - dx
   }
-  const endDrag = () => {
+  const endDrag = (e: ReactPointerEvent) => {
+    if (e.pointerType === 'touch') releaseTouch()
     drag.current.active = false
     setDragging(false)
   }
-
-  // Vertical wheel scrolls the strip sideways while hovered, until it reaches an end.
-  useEffect(() => {
-    const el = stripRef.current
-    if (!el) return
-    const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return // trackpads already scroll sideways
-      const max = el.scrollWidth - el.clientWidth
-      const atEnd = (e.deltaY > 0 && el.scrollLeft >= max - 1) || (e.deltaY < 0 && el.scrollLeft <= 0)
-      if (atEnd) return
-      e.preventDefault()
-      el.scrollLeft += e.deltaY
-    }
-    el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
-  }, [])
 
   // Seamless loop: several copies of the logos, and the track slides by exactly one copy's
   // width (measured), so it never runs out on wide screens. Copies are hidden from assistive tech.
@@ -140,7 +141,8 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
         className={`strip-tile ${focus === id ? 'is-on' : ''}`}
         aria-pressed={focus === id}
         aria-label={`Ask about ${name(id)}`}
-        tabIndex={copy > 0 ? -1 : undefined}
+        // Out of the Tab order: the app names below do the same job with far fewer stops.
+        tabIndex={-1}
         onClick={(e) => {
           if (drag.current.moved) return // end of a drag, not a tap
           onPick(id, e.currentTarget)
@@ -180,7 +182,7 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
       <div className="strip-wrap">
         <motion.div
           ref={stripRef}
-          className={`strip ${reduced ? 'is-static' : ''} ${dragging ? 'is-dragging' : ''}`}
+          className={`strip ${reduced ? 'is-static' : ''} ${dragging ? 'is-dragging' : ''} ${touchHeld ? 'is-held' : ''}`}
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
@@ -188,7 +190,11 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerLeave={endDrag}
+          onPointerCancel={endDrag}
           onScroll={onStripScroll}
+          tabIndex={0}
+          role="region"
+          aria-label="App logos. Use the arrow keys to scroll, or pick an app from the list below."
         >
           <motion.div className="strip-drift" style={{ x: reduced ? 0 : drift }}>
             <ul className="strip-track" ref={trackRef} aria-label="Ask about one app">

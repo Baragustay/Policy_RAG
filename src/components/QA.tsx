@@ -1,7 +1,7 @@
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { shortAnswerText, understoodQuestion } from '../lib/answer'
-import { useApps } from '../lib/apps'
+import { backendApp, useApps } from '../lib/apps'
 import { popSpring, softSpring, spring } from '../lib/motion'
 import type { Entry, FocusOrigin } from '../lib/types'
 import { AnswerCard } from './AnswerCard'
@@ -130,10 +130,26 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
   }
 
   // Clicking into the field clears the question that was just asked, ready for a new one.
-  // Anything newly typed is never wiped.
-  const showsAsked = () => !!newest && draft === newest.message
+  // Anything newly typed is never wiped. The old question can always come back: the Edit button
+  // above the answer, or the ↑ key in an empty field.
+  // Auto-clear happens once per answer, so a question brought back for editing stays put.
+  const clearedFor = useRef<string | null>(null)
+  const showsAsked = () => !!newest && draft === newest.message && clearedFor.current !== newest.id
   const clearIfAsked = () => {
-    if (showsAsked()) setDraft('')
+    if (!showsAsked() || !newest) return
+    clearedFor.current = newest.id
+    setDraft('')
+  }
+  const editLast = () => {
+    if (!newest) return
+    clearedFor.current = newest.id
+    setDraft(newest.message)
+    requestAnimationFrame(() => {
+      const el = input.current
+      if (!el) return
+      el.focus()
+      el.setSelectionRange(el.value.length, el.value.length)
+    })
   }
 
   // A related question flies into the search box, then gets asked.
@@ -210,6 +226,11 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
                     submit(e)
                     return
                   }
+                  if (e.key === 'ArrowUp' && draft === '' && newest) {
+                    e.preventDefault()
+                    editLast()
+                    return
+                  }
                   // Cursor still in the field after asking: the first typed character replaces the old question.
                   if (showsAsked() && e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) e.currentTarget.select()
                 }}
@@ -225,6 +246,11 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
               <ScopePicker focus={focus} origin={focusOrigin} onChange={onFocus} />
               <p className="note">Questions are not stored.</p>
             </div>
+            {focus && backendApp(focus) !== focus && (
+              <p className="scope-note">
+                {name(focus)} uses {name(backendApp(focus))}'s privacy policy and terms, so answers cite {name(backendApp(focus))}.
+              </p>
+            )}
 
             {entries.length === 0 && (
               <ul className="examples" aria-label="Example questions">
@@ -256,6 +282,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
                 entry={newest}
                 isLatest
                 showQuestion={draft !== newest.message}
+                onEdit={editLast}
                 busy={busy || !!flight}
                 onRetry={() => onRetry(newest.id)}
                 onSend={ask}

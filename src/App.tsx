@@ -33,6 +33,26 @@ const blurViews: Variants = {
 
 const uid = () => Math.random().toString(36).slice(2, 10)
 
+// The splash plays once per browser session, not on every reload.
+const SPLASH_KEY = 'pt-splash-seen'
+function splashSeen() {
+  try {
+    return sessionStorage.getItem(SPLASH_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+function markSplashSeen() {
+  try {
+    sessionStorage.setItem(SPLASH_KEY, '1')
+  } catch {
+    /* private mode: the splash may show again, which is harmless */
+  }
+}
+
+/** What a scope change cleared, so it can be undone for a few seconds. */
+type Cleared = { focus: string | null; entries: Entry[]; context: { question: string; type: string } }
+
 /** What screen readers hear when an answer arrives. */
 function announcement(data: AskResponse): string {
   if (data.type === 'error') return 'The AI service is busy. You can try again.'
@@ -46,17 +66,27 @@ export default function App() {
   const [entries, setEntries] = useState<Entry[]>([])
   const [busy, setBusy] = useState(false)
   const [live, setLive] = useState('')
-  const [splash, setSplash] = useState(true)
+  const [splash, setSplash] = useState(() => !splashSeen())
+  const [cleared, setCleared] = useState<Cleared | null>(null)
   const busyRef = useRef(false)
-  const firstView = useRef(true)
+  const shownView = useRef<View>(view)
   // The previous answer's question and type, sent along so follow-ups keep their context.
   const context = useRef({ question: '', type: '' })
 
   // The splash is a short intro, never a wait: it leaves on its own after ~2 s (or on tap).
   useEffect(() => {
+    if (!splash) return
+    markSplashSeen()
     const t = setTimeout(() => setSplash(false), 2200)
     return () => clearTimeout(t)
-  }, [])
+  }, [splash])
+
+  // The Undo notice goes away on its own.
+  useEffect(() => {
+    if (!cleared) return
+    const t = setTimeout(() => setCleared(null), 7000)
+    return () => clearTimeout(t)
+  }, [cleared])
 
   // Wake the sleeping Space as early as possible.
   useEffect(() => {
@@ -75,23 +105,24 @@ export default function App() {
     setView(next)
   }, [])
 
-  // Move focus to the new view for keyboard and screen reader users.
+  // After switching page, move focus to its heading for keyboard and screen reader users.
+  // (Compares with the page already shown, so the first load never steals focus.)
   useEffect(() => {
+    if (shownView.current === view) return
+    shownView.current = view
     window.scrollTo(0, 0)
-    if (firstView.current) {
-      firstView.current = false
-      return
-    }
     const t = setTimeout(() => document.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true }), 50)
     return () => clearTimeout(t)
   }, [view])
 
-  // History belongs to one scope: switching app (or to/from all apps) starts fresh.
-  // A request still in flight for the old scope is ignored when it returns.
+  // History belongs to one scope: switching app (or to/from all apps) starts fresh, with an
+  // Undo for a few seconds. A request still in flight for the old scope is ignored when it returns.
   const generation = useRef(0)
   const changeFocus = useCallback(
     (id: string | null) => {
       if (id === focus) return
+      const done = entries.filter((e) => e.status === 'done')
+      setCleared(done.length ? { focus, entries: done, context: context.current } : null)
       generation.current += 1
       context.current = { question: '', type: '' }
       setEntries([])
@@ -99,8 +130,19 @@ export default function App() {
       busyRef.current = false
       setBusy(false)
     },
-    [focus],
+    [focus, entries],
   )
+
+  const undoClear = useCallback(() => {
+    if (!cleared) return
+    generation.current += 1
+    context.current = cleared.context
+    setEntries(cleared.entries)
+    setFocus(cleared.focus)
+    busyRef.current = false
+    setBusy(false)
+    setCleared(null)
+  }, [cleared])
 
   const run = useCallback(async (entryId: string, req: AskRequest) => {
     const gen = generation.current
@@ -164,6 +206,24 @@ export default function App() {
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {live}
         </div>
+        <AnimatePresence>
+          {cleared && view === 'home' && (
+            <motion.div
+              key="undo"
+              className="toast"
+              role="status"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <span>Started a fresh search. Your earlier answers were cleared.</span>
+              <button type="button" className="toast-btn" onClick={undoClear}>
+                Undo
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div key={view} className="view" variants={view === 'about' ? blurViews : views} initial="initial" animate="enter" exit="exit">
             {view === 'home' && (

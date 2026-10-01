@@ -38,11 +38,18 @@ export function ScopePicker({ focus, origin, onChange }: Props) {
     const onDown = (e: PointerEvent) => {
       if (!wrap.current?.contains(e.target as Node)) setOpen(false)
     }
+    // Scrolling the page closes it, so it never sits over the answer.
+    const start = window.scrollY
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - start) > 40) setOpen(false)
+    }
     document.addEventListener('keydown', onKey)
     document.addEventListener('pointerdown', onDown)
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       document.removeEventListener('keydown', onKey)
       document.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('scroll', onScroll)
     }
   }, [open])
 

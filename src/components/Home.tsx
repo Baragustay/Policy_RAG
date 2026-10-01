@@ -40,6 +40,19 @@ export function Home({ theme, onToggleTheme, entries, focus, busy, onFocus, onSe
 
   return (
     <div className="page home">
+      {/* First Tab stop: jump straight to the search box. */}
+      <a
+        className="skip-link"
+        href="#ask-input"
+        onClick={(e) => {
+          e.preventDefault()
+          const input = document.getElementById('ask-input')
+          input?.focus({ preventScroll: true })
+          input?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' })
+        }}
+      >
+        Skip to search
+      </a>
       <header className="hero">
         <TopBar theme={theme} onToggleTheme={onToggleTheme} onAbout={onAbout} />
         <SplitHero focus={focus} onPick={pick} onPickAll={pickAll} />
