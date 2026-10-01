@@ -539,9 +539,6 @@ h1[tabindex='-1']:focus {
   text-decoration: none;
   white-space: nowrap;
 }
-.me-name:hover {
-  text-decoration: underline;
-}
 .me-links {
   display: flex;
   align-items: center;
@@ -558,8 +555,14 @@ h1[tabindex='-1']:focus {
 .me-links a:hover {
   background: var(--glass-strong);
 }
-.me-links img {
-  border-radius: 3px;
+.linkedin-mark {
+  display: block;
+  /* The mark is 256×217 (it includes the ®), so keep that shape. */
+  width: 20px;
+  height: 17px;
+  background: currentColor;
+  -webkit-mask: url('/linkedin-mono.png') center / contain no-repeat;
+  mask: url('/linkedin-mono.png') center / contain no-repeat;
 }
 
 /* "The split": the title cut in half, opening to reveal the subheading. */
@@ -1752,6 +1755,7 @@ h1[tabindex='-1']:focus {
   transform: none;
 }
 .squinty-hello[data-tip-align='start']::before {
+  max-width: 300px;
   text-align: left;
 }
 /* Near the right edge: align the bubble to the element's right side. */

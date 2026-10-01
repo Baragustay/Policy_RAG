@@ -33,8 +33,9 @@ export function TopBar({ theme, onToggleTheme, onAbout }: Props) {
             aria-label="Barbora on LinkedIn (opens in a new tab)"
             data-tip="LinkedIn"
           >
-            {/* Official LinkedIn file (LinkedIn is not in Simple Icons). */}
-            <img src="logos/linkedin.png" alt="" width="18" height="18" />
+            {/* Official LinkedIn mark (not in Simple Icons) as a one-colour mask, so it matches the
+                GitHub icon in both themes and keeps its real proportions. */}
+            <span className="linkedin-mark" aria-hidden="true" />
           </a>
           <a href="https://github.com/baragustay" target="_blank" rel="noopener noreferrer" aria-label="Barbora on GitHub (opens in a new tab)" data-tip="GitHub">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">

@@ -40,14 +40,20 @@ export function Squint({ mood, size = 64, className = '' }: Props) {
 interface HelloProps extends Props {
   /** Where the bubble opens: centred under Squinty, or towards the right (near a left edge). */
   align?: 'center' | 'start'
+  /** What Squinty says on hover. */
+  message?: string
 }
 
 /** Squinty with a hover hello. Decorative: the same message is in the page text. */
-export function HelloSquinty({ align = 'center', ...props }: HelloProps) {
+export function HelloSquinty({
+  align = 'center',
+  message = "Hi! I'm Squinty. I read the policies so you don't have to, and help you understand them.",
+  ...props
+}: HelloProps) {
   return (
     <span
       className="squinty-hello"
-      data-tip="Hi! I'm Squinty. I read the policies so you don't have to, and help you understand them."
+      data-tip={message}
       data-tip-align={align === 'start' ? 'start' : undefined}
     >
       <Squint {...props} />

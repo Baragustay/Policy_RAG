@@ -173,7 +173,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
           Ask about an app's privacy or terms
         </h2>
         <div className="ask-row">
-          <HelloSquinty mood={mood} size={64} className="ask-squint" align="start" />
+          <HelloSquinty mood={mood} size={64} className="ask-squint" align="start" message="I'm Squinty!" />
           <div className="ask-main">
             {entries.length === 0 ? (
               <p className="guide">
