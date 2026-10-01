@@ -909,7 +909,8 @@ h1[tabindex='-1']:focus {
   box-shadow: 0 8px 24px -14px rgb(31 27 46 / 0.4);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-/* Active field: a soft purple glow all around, not a thick outline. */
+/* Hovered or active field: a soft purple glow all around, not a thick outline. */
+.search-box:hover,
 .search-box:focus-within {
   border-color: color-mix(in srgb, var(--accent) 70%, transparent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent), 0 8px 28px -10px color-mix(in srgb, var(--accent) 45%, transparent);
