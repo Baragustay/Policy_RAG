@@ -72,6 +72,16 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
   const drag = useRef({ x: 0, left: 0, moved: false, active: false })
   const [dragging, setDragging] = useState(false)
 
+  // Touch screens: the strip slides for 5 seconds after load, then settles (and stays swipeable).
+  // Motion that stops within 5 s needs no pause control (WCAG 2.2.2); on phones the strip is
+  // mostly a visual effect, and the app names below do the real job.
+  const [settled, setSettled] = useState(false)
+  useEffect(() => {
+    if (hoverOnly) return
+    const t = setTimeout(() => setSettled(true), 5000)
+    return () => clearTimeout(t)
+  }, [hoverOnly])
+
   // Touching the strip pauses it (touch screens have no hover), and it stays still for a moment after.
   const [touchHeld, setTouchHeld] = useState(false)
   const releaseTimer = useRef<number | undefined>(undefined)
@@ -182,7 +192,7 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
       <div className="strip-wrap">
         <motion.div
           ref={stripRef}
-          className={`strip ${reduced ? 'is-static' : ''} ${dragging ? 'is-dragging' : ''} ${touchHeld ? 'is-held' : ''}`}
+          className={`strip ${reduced ? 'is-static' : ''} ${dragging ? 'is-dragging' : ''} ${touchHeld || (settled && !hoverOnly) ? 'is-held' : ''}`}
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
