@@ -27,24 +27,17 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
   const drift = useSpring(useTransform(scrollY, [0, 800], [0, -220]), { stiffness: 120, damping: 30 })
 
   // The title starts whole, then splits open to reveal the subheading.
-  // Mouse: it opens once by itself shortly after load (so first-time visitors see the promise),
-  // closes, and from then on opens on hover. Touch: it opens once and stays open, so nothing
-  // keeps moving. Reduced motion: always open.
+  // Mouse: opens on hover, closes when the pointer leaves. Touch (no hover): it opens once
+  // shortly after load and stays open, so nothing keeps moving. Reduced motion: always open.
   const hoverOnly = useMedia('(hover: hover) and (pointer: fine)')
   const [hovered, setHovered] = useState(false)
-  const [phase, setPhase] = useState<'closed' | 'intro' | 'settled'>('closed')
+  const [touchOpen, setTouchOpen] = useState(false)
   useEffect(() => {
-    if (reduced) return
-    if (phase === 'closed') {
-      const t = setTimeout(() => setPhase('intro'), 3000)
-      return () => clearTimeout(t)
-    }
-    if (phase === 'intro' && hoverOnly) {
-      const t = setTimeout(() => setPhase('settled'), 4500)
-      return () => clearTimeout(t)
-    }
-  }, [phase, hoverOnly, reduced])
-  const isOpen = !!reduced || hovered || phase === 'intro' || (!hoverOnly && phase !== 'closed')
+    if (reduced || hoverOnly) return
+    const t = setTimeout(() => setTouchOpen(true), 3000)
+    return () => clearTimeout(t)
+  }, [hoverOnly, reduced])
+  const isOpen = !!reduced || hovered || (!hoverOnly && touchOpen)
   const openSpring = useSpring(isOpen ? 1 : 0, { stiffness: 120, damping: 20 })
   useEffect(() => openSpring.set(isOpen ? 1 : 0), [isOpen, openSpring])
   const topY = useTransform(openSpring, (v) => `calc(var(--gap) * ${-0.5 * v})`)
