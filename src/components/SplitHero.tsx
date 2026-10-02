@@ -36,14 +36,19 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
 
   // The title starts whole, then splits open to reveal the subheading.
   // Mouse: opens on hover, closes when the pointer leaves. Touch (no hover): it opens once
-  // shortly after load and stays open, so nothing keeps moving. Reduced motion: always open.
+  // shortly after load so visitors see the subheading, closes 2 s later, and from then on a tap
+  // opens or closes it. Reduced motion: always open.
   const hoverOnly = useMedia('(hover: hover) and (pointer: fine)')
   const [hovered, setHovered] = useState(false)
   const [touchOpen, setTouchOpen] = useState(false)
   useEffect(() => {
     if (reduced || hoverOnly) return
-    const t = setTimeout(() => setTouchOpen(true), 3000)
-    return () => clearTimeout(t)
+    const open = setTimeout(() => setTouchOpen(true), 600)
+    const close = setTimeout(() => setTouchOpen(false), 2600)
+    return () => {
+      clearTimeout(open)
+      clearTimeout(close)
+    }
   }, [hoverOnly, reduced])
   const isOpen = !!reduced || hovered || (!hoverOnly && touchOpen)
   const openSpring = useSpring(isOpen ? 1 : 0, { stiffness: 120, damping: 20 })
@@ -186,7 +191,12 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
 
   return (
     <div className="split">
-      <div className="split-head" onPointerEnter={() => setHovered(true)} onPointerLeave={() => setHovered(false)}>
+      <div
+        className="split-head"
+        onPointerEnter={(e) => e.pointerType === 'mouse' && setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
+        onClick={() => !hoverOnly && setTouchOpen((o) => !o)}
+      >
         <div className="split-stage" ref={stageRef}>
           <h1 className="split-title" tabIndex={-1}>
             <span className="sr-only">Policy Translator</span>
