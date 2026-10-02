@@ -747,6 +747,36 @@ h1[tabindex='-1']:focus {
   margin: 0;
   font-size: inherit;
 }
+/* "SQUINTY" label: on the hero (just above the closed title, see SplitHero) and the splash. */
+.squinty-tag {
+  font-family: var(--font-display);
+  /* Heavy, just a step below the title's 900. */
+  font-weight: 850;
+  font-stretch: 112%;
+  font-size: clamp(0.875rem, 2.2vw, 1.0625rem);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  /* Orange into the text colour (near-black, or near-white in dark mode), so it stays readable. */
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--warm), var(--ink) 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.split-title {
+  position: relative;
+}
+.split-tag {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  /* Only as wide as the word, so the gradient runs across the letters, not the whole row. */
+  width: max-content;
+  margin-inline: auto;
+  pointer-events: none;
+}
 .split-half {
   grid-area: 1 / 1;
   display: flex;
@@ -1867,6 +1897,10 @@ h1[tabindex='-1']:focus {
   gap: 14px;
   width: min(100%, 980px);
   text-align: center;
+}
+.splash-tag {
+  /* Scaled up with the bigger splash title. */
+  font-size: clamp(1rem, 3vw, 1.5rem);
 }
 .splash-title {
   display: flex;

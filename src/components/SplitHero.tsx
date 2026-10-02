@@ -57,6 +57,11 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
   const bottomY = useTransform(openSpring, (v) => `calc(var(--gap) * ${0.5 * v})`)
   const subOpacity = useTransform(openSpring, [0.55, 1], [0, 1])
   const subScale = useTransform(openSpring, [0, 1], [0.92, 1])
+  // "Squinty" above the closed title, like a speaker's name in a script. It rides up with the
+  // top half as the title opens, blurring out, and settles back when it closes.
+  const tagOpacity = useTransform(openSpring, [0, 0.6], [1, 0])
+  const tagY = useTransform(openSpring, (v) => `calc(var(--gap) * ${-0.5 * v} - ${v * 10}px)`)
+  const tagBlur = useTransform(openSpring, [0, 0.6], ['blur(0px)', 'blur(6px)'])
 
   // The opening is exactly as tall as the subheading (plus breathing room).
   const stageRef = useRef<HTMLDivElement>(null)
@@ -200,6 +205,9 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
         <div className="split-stage" ref={stageRef}>
           <h1 className="split-title" tabIndex={-1}>
             <span className="sr-only">Policy Translator</span>
+            <motion.span className="squinty-tag split-tag" style={{ opacity: tagOpacity, y: tagY, filter: tagBlur }} aria-hidden="true">
+              Squinty
+            </motion.span>
             <motion.span className="split-half top" style={{ y: topY }} aria-hidden="true">
               <span ref={splitRef} className="split-word">
                 {word}

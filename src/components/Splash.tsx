@@ -19,6 +19,9 @@ export function Splash({ onDone }: { onDone: () => void }) {
         <motion.div initial={{ opacity: 0, scale: 0.6, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ ...softSpring, delay: 0.05 }}>
           <Squint mood="idle" size={128} />
         </motion.div>
+        <motion.span className="squinty-tag splash-tag" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ ...softSpring, delay: 0.14 }}>
+          Squinty
+        </motion.span>
         <motion.div className="splash-title" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ ...softSpring, delay: 0.2 }}>
           <span ref={titleRef} className="split-word">
             Policy Translator
