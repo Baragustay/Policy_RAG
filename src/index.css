@@ -384,7 +384,12 @@ h1[tabindex='-1']:focus {
   border: 0;
   background: var(--warm);
   color: var(--warm-ink);
-  transition: transform 0.15s, opacity 0.2s;
+  transition: transform 0.15s, opacity 0.2s, background-color 0.2s;
+}
+/* Empty field: Squinty's own body gradient (as in squinty-icon.svg); the full orange once
+   something is typed. */
+.send-btn.is-empty {
+  background: radial-gradient(circle at 40% 30%, #ffe9b0 0%, #ffc88a 38%, #ff9f86 72%, #f98db6 100%);
 }
 .send-btn:active:not(:disabled) {
   transform: scale(0.9);
@@ -2002,12 +2007,38 @@ h1[tabindex='-1']:focus {
   }
 }
 
+/* Animated "...": each dot fades in after the one before, then all fade out together. */
+.dots span {
+  margin-left: 0.12em;
+  animation: dot 1.4s infinite;
+}
+.dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes dot {
+  0%,
+  15% {
+    opacity: 0;
+  }
+  35%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 /* ---------- 12. Motion and transparency preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
   .skip-link,
   .prompt summary svg {
     transition: none;
   }
+  .dots span,
   .squint-art svg,
   .squint-art ellipse,
   .squint-art circle {

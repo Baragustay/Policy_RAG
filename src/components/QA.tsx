@@ -7,6 +7,7 @@ import type { Entry, FocusOrigin } from '../lib/types'
 import { AnswerCard } from './AnswerCard'
 import { ScopePicker } from './ScopePicker'
 import { ChevronIcon, SendIcon } from './icons'
+import { WithDots } from './LoadingBody'
 import { HelloSquinty, type Mood } from './Squint'
 
 interface Props {
@@ -124,7 +125,9 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
   const submit = (e?: FormEvent) => {
     e?.preventDefault()
     const text = draft.trim()
-    if (!text || busy) return
+    if (busy) return
+    // The button stays orange even when the field is empty; then it just puts the cursor there.
+    if (!text) return input.current?.focus()
     ask(text)
   }
 
@@ -199,7 +202,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
                   transition={{ duration: 0.2 }}
                   aria-hidden="true"
                 >
-                  {GUIDE[mood]}
+                  <WithDots text={GUIDE[mood] ?? ''} />
                 </motion.p>
               </AnimatePresence>
             )}
@@ -232,7 +235,14 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
                 placeholder="Ask about a service's privacy or terms..."
                 enterKeyHint="search"
               />
-              <button type="submit" className="send-btn" aria-label="Ask" disabled={!draft.trim() || busy}>
+              <button
+                type="submit"
+                className={`send-btn ${draft.trim() ? '' : 'is-empty'}`}
+                aria-label="Ask"
+                disabled={busy}
+                data-tip={draft.trim() ? undefined : 'Type a question first'}
+                data-tip-align="end"
+              >
                 <SendIcon />
               </button>
             </form>

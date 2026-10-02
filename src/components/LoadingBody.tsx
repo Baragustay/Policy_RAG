@@ -5,6 +5,22 @@ import { isConnected } from '../lib/api'
 const STEPS = ['Finding the right policies...', 'Reading the small print...', 'Translating to plain language...']
 const WAKING = 'Waking up the server. The first answer can take up to a minute...'
 
+/** A trailing "..." whose dots appear one by one: ". . ." Static with reduced motion. */
+export function WithDots({ text }: { text: string }) {
+  if (!text.endsWith('...')) return <>{text}</>
+  return (
+    <>
+      {text.slice(0, -3)}
+      <span className="dots" aria-hidden="true">
+        <span>.</span>
+        <span>.</span>
+        <span>.</span>
+      </span>
+      <span className="sr-only">...</span>
+    </>
+  )
+}
+
 /** Loading state inside an answer card: changing status text and a glass skeleton. */
 export function LoadingBody() {
   const [step, setStep] = useState(0)
@@ -26,7 +42,7 @@ export function LoadingBody() {
       <div className="status" role="status">
         <AnimatePresence mode="wait" initial={false}>
           <motion.span key={text} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-            {text}
+            <WithDots text={text} />
           </motion.span>
         </AnimatePresence>
       </div>
