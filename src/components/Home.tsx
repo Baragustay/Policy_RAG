@@ -54,8 +54,11 @@ export function Home({ theme, onToggleTheme, entries, focus, busy, onFocus, onSe
       >
         Skip to search
       </a>
-      <header className="hero">
+      {/* Outside the hero, so on phones it can stick to the top of the whole page. */}
+      <div className="topbar-wrap">
         <TopBar theme={theme} onToggleTheme={onToggleTheme} onAbout={onAbout} onReplayIntro={onReplayIntro} />
+      </div>
+      <header className="hero">
         <SplitHero focus={focus} onPick={pick} onPickAll={pickAll} />
       </header>
 
