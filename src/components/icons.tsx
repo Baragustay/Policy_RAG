@@ -5,6 +5,11 @@ export const SendIcon = () => (
     <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
   </svg>
 )
+export const MenuIcon = ({ size = 20 }: { size?: number }) => (
+  <svg {...base} width={size} height={size}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
+)
 export const CloseIcon = ({ size = 16 }: { size?: number }) => (
   <svg {...base} width={size} height={size}>
     <path d="M6 6l12 12M18 6 6 18" />

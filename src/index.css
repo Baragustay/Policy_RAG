@@ -604,6 +604,41 @@ h1[tabindex='-1']:focus {
   gap: 8px;
 }
 
+/* Phones get a menu (About, theme) instead of the two buttons; see the 480px block. */
+.phone-menu {
+  display: none;
+  position: relative;
+}
+.phone-menu-list {
+  position: absolute;
+  z-index: 70;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 16px;
+}
+.phone-menu-list button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  text-align: left;
+}
+.phone-menu-list button:active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
 /* Top left: Squinty, the portfolio link and contact icons. */
 .topbar-me {
   display: flex;
@@ -1893,6 +1928,13 @@ h1[tabindex='-1']:focus {
   background: #f2eff9;
   color: #1f1b2e;
 }
+/* Touch screens keep a "sticky" hover after a tap, which left tooltips hanging. There they only
+   show for keyboard focus; Squinty's hello is the exception and still answers a tap. */
+@media (hover: none) {
+  [data-tip]:not(.squinty-hello):not(:focus-visible)::before {
+    display: none;
+  }
+}
 
 /* Theme switch: a circle grows from the toggle (View Transitions). */
 ::view-transition-old(root),
@@ -1949,20 +1991,14 @@ h1[tabindex='-1']:focus {
     height: 28px;
   }
   .topbar-actions {
-    gap: 6px;
+    display: none;
+  }
+  .phone-menu {
+    display: block;
   }
   .topbar .icon-btn {
     width: 40px;
     height: 40px;
-  }
-  .text-btn {
-    justify-content: center;
-    width: 40px;
-    min-height: 40px;
-    padding: 0;
-  }
-  .text-btn-label {
-    display: none;
   }
 
   /* Squinty and his line side by side; the search box gets the full width below. */
