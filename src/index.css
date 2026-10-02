@@ -1996,8 +1996,9 @@ h1[tabindex='-1']:focus {
   .search-box {
     padding-left: 14px;
   }
+  /* 16px: anything smaller makes iPhone Safari zoom in when the field is tapped. */
   .search-box textarea {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 }
 

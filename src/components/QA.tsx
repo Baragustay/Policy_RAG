@@ -2,6 +2,7 @@ import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/r
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { shortAnswerText, understoodQuestion } from '../lib/answer'
 import { backendApp, useApps } from '../lib/apps'
+import { useMedia } from '../lib/hooks'
 import { popSpring, softSpring, spring } from '../lib/motion'
 import type { Entry, FocusOrigin } from '../lib/types'
 import { AnswerCard } from './AnswerCard'
@@ -64,6 +65,9 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
   const [reservedHeight, setReservedHeight] = useState(TYPICAL_ANSWER_HEIGHT)
   const card = useRef<HTMLElement>(null)
   const input = useRef<HTMLTextAreaElement>(null)
+  // The empty field is one line, so phones get a shorter placeholder that fits.
+  const narrow = useMedia('(max-width: 480px)')
+  const tiny = useMedia('(max-width: 360px)')
   const answerRef = useRef<HTMLDivElement>(null)
   const lastAnswerHeight = useRef(0)
   const flightTimer = useRef<number | undefined>(undefined)
@@ -232,7 +236,9 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
                   // Cursor still in the field after asking: the first typed character replaces the old question.
                   if (showsAsked() && e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) e.currentTarget.select()
                 }}
-                placeholder="Ask about a service's privacy or terms..."
+                placeholder={
+                  tiny ? 'Ask a question...' : narrow ? 'Ask about privacy or terms...' : "Ask about a service's privacy or terms..."
+                }
                 enterKeyHint="search"
               />
               <button
