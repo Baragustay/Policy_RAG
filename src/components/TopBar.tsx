@@ -1,5 +1,8 @@
 import { siGithub } from 'simple-icons'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { softSpring } from '../lib/motion'
 import type { Theme } from '../lib/theme'
 import { CloseIcon, HelpIcon, MenuIcon } from './icons'
 import { Squint } from './Squint'
@@ -60,72 +63,117 @@ export function TopBar({ theme, onToggleTheme, onAbout, onReplayIntro }: Props) 
   )
 }
 
-/** Phones only (CSS shows it instead of .topbar-actions): About and the theme switch in a small menu. */
+/**
+ * Phones only (CSS shows it instead of .topbar-actions): About and the theme switch in a
+ * full-screen menu that grows out of the menu button as a circle and shrinks back into it.
+ */
 function PhoneMenu({ theme, onToggleTheme, onAbout }: Omit<Props, 'onReplayIntro'>) {
   const [open, setOpen] = useState(false)
-  const wrap = useRef<HTMLDivElement>(null)
+  // Where the menu button sits, so the circle grows from it and the close button lands on it.
+  const [at, setAt] = useState<DOMRect | null>(null)
   const button = useRef<HTMLButtonElement>(null)
+  const first = useRef<HTMLButtonElement>(null)
+  const reduced = useReducedMotion()
   const dark = theme === 'dark'
 
-  // Closes on a tap outside or Escape (Escape puts focus back on the menu button).
+  const show = () => {
+    setAt(button.current?.getBoundingClientRect() ?? null)
+    setOpen(true)
+  }
+  const close = (refocus = true) => {
+    setOpen(false)
+    if (refocus) button.current?.focus()
+  }
+
+  // While open: Escape closes, the page underneath doesn't scroll, focus starts on the first item.
   useEffect(() => {
     if (!open) return
-    const onDown = (e: PointerEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false)
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      setOpen(false)
-      button.current?.focus()
-    }
-    document.addEventListener('pointerdown', onDown)
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close()
     document.addEventListener('keydown', onKey)
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    first.current?.focus({ preventScroll: true })
     return () => {
-      document.removeEventListener('pointerdown', onDown)
       document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = overflow
     }
   }, [open])
 
+  const cx = at ? at.left + at.width / 2 : window.innerWidth - 40
+  const cy = at ? at.top + at.height / 2 : 40
+  const ease = [0.65, 0, 0.35, 1] as const
+  const item = {
+    hidden: { opacity: 0, y: 24 },
+    show: { opacity: 1, y: 0, transition: reduced ? { duration: 0 } : softSpring },
+  }
+
   return (
-    <div className="phone-menu" ref={wrap}>
-      <button
-        ref={button}
-        type="button"
-        className="icon-btn"
-        aria-label="Menu"
-        aria-expanded={open}
-        aria-controls="phone-menu-list"
-        onClick={() => setOpen((o) => !o)}
-      >
-        {open ? <CloseIcon size={20} /> : <MenuIcon />}
+    <div className="phone-menu">
+      <button ref={button} type="button" className="icon-btn" aria-label="Menu" aria-expanded={open} aria-haspopup="dialog" onClick={show}>
+        <MenuIcon />
       </button>
-      {open && (
-        <ul id="phone-menu-list" className="phone-menu-list glass-solid">
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false)
-                onAbout()
-              }}
+      {createPortal(
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              className="phone-menu-sheet"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu"
+              initial={reduced ? { opacity: 0 } : { clipPath: `circle(0px at ${cx}px ${cy}px)` }}
+              animate={reduced ? { opacity: 1 } : { clipPath: `circle(150vmax at ${cx}px ${cy}px)` }}
+              exit={reduced ? { opacity: 0 } : { clipPath: `circle(0px at ${cx}px ${cy}px)` }}
+              transition={reduced ? { duration: 0.15 } : { duration: 0.5, ease }}
             >
-              <HelpIcon size={18} />
-              About
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              onClick={(e) => {
-                onToggleTheme(e.currentTarget)
-                setOpen(false)
-              }}
-            >
-              <ThemeIcon dark={!dark} />
-              {dark ? 'Light mode' : 'Dark mode'}
-            </button>
-          </li>
-        </ul>
+              <motion.button
+                type="button"
+                className="icon-btn phone-menu-close"
+                aria-label="Close menu"
+                style={at ? { top: at.top, left: at.left, width: at.width, height: at.height } : undefined}
+                initial={reduced ? false : { rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1, transition: { delay: 0.15 } }}
+                exit={{ rotate: -90, opacity: 0, transition: { duration: 0.15 } }}
+                onClick={() => close()}
+              >
+                <CloseIcon size={20} />
+              </motion.button>
+              <motion.ul
+                className="phone-menu-list"
+                initial="hidden"
+                animate="show"
+                exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                variants={{ show: { transition: { delayChildren: reduced ? 0 : 0.18, staggerChildren: 0.07 } } }}
+              >
+                <motion.li variants={item}>
+                  <button
+                    ref={first}
+                    type="button"
+                    onClick={() => {
+                      close(false)
+                      onAbout()
+                    }}
+                  >
+                    <HelpIcon size={26} />
+                    About
+                  </button>
+                </motion.li>
+                <motion.li variants={item}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      onToggleTheme(e.currentTarget)
+                      close()
+                    }}
+                  >
+                    <ThemeIcon dark={!dark} size={26} />
+                    {dark ? 'Light mode' : 'Dark mode'}
+                  </button>
+                </motion.li>
+              </motion.ul>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
       )}
     </div>
   )

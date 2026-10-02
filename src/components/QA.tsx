@@ -255,7 +255,6 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
 
             <div className="scope-row">
               <ScopePicker focus={focus} origin={focusOrigin} onChange={onFocus} />
-              <p className="note">Questions are not stored.</p>
             </div>
             {focus && backendApp(focus) !== focus && (
               <p className="scope-note">
@@ -264,15 +263,20 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
             )}
 
             {entries.length === 0 && (
-              <ul className="examples" aria-label="Example questions">
-                {examples(focus, name).map((q, i) => (
-                  <motion.li key={q} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...popSpring, delay: 0.1 + i * 0.06 }}>
-                    <motion.button type="button" className="chip" whileTap={{ scale: 0.92 }} onClick={(e) => followup(q, e.currentTarget)}>
-                      {q}
-                    </motion.button>
-                  </motion.li>
-                ))}
-              </ul>
+              <div className="examples">
+                <p className="followups-label" id="examples-label">
+                  Suggested questions
+                </p>
+                <ul aria-labelledby="examples-label">
+                  {examples(focus, name).map((q, i) => (
+                    <motion.li key={q} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...popSpring, delay: 0.1 + i * 0.06 }}>
+                      <motion.button type="button" className="chip" whileTap={{ scale: 0.92 }} onClick={(e) => followup(q, e.currentTarget)}>
+                        {q}
+                      </motion.button>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>

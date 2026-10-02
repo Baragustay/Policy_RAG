@@ -398,12 +398,6 @@ h1[tabindex='-1']:focus {
   opacity: 0.45;
 }
 
-.note {
-  margin: 8px 4px 0;
-  font-size: 0.8125rem;
-  color: var(--ink-2);
-}
-
 /* Questions (examples, related questions) are purple; hover deepens the purple. */
 .chip {
   display: inline-block;
@@ -458,7 +452,7 @@ h1[tabindex='-1']:focus {
 }
 
 .pick-grid,
-.examples,
+.examples ul,
 .followups ul {
   list-style: none;
   margin: 0;
@@ -604,36 +598,44 @@ h1[tabindex='-1']:focus {
   gap: 8px;
 }
 
-/* Phones get a menu (About, theme) instead of the two buttons; see the 480px block. */
+/* Phones get a full-screen menu (About, theme) instead of the two buttons; see the 480px block. */
 .phone-menu {
   display: none;
-  position: relative;
+}
+.phone-menu-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg-base) 82%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+.phone-menu-close {
+  position: fixed;
 }
 .phone-menu-list {
-  position: absolute;
-  z-index: 70;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 180px;
+  display: grid;
+  gap: 12px;
   margin: 0;
-  padding: 6px;
+  padding: 0;
   list-style: none;
-  border-radius: 16px;
 }
 .phone-menu-list button {
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 44px;
-  padding: 0 12px;
+  gap: 16px;
+  min-height: 56px;
+  padding: 0 20px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 16px;
   background: none;
   color: var(--ink);
-  font-weight: 500;
-  font-size: 0.9375rem;
-  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: -0.01em;
 }
 .phone-menu-list button:active {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
@@ -1047,10 +1049,6 @@ h1[tabindex='-1']:focus {
   flex-wrap: wrap;
   gap: 6px 12px;
   margin-top: 10px;
-}
-.scope-row .note {
-  margin: 0;
-  font-size: 0.75rem;
 }
 .focus-wrap {
   position: relative;
@@ -2104,12 +2102,14 @@ h1[tabindex='-1']:focus {
   }
   .glass,
   .glass-solid,
-  .strip-center {
+  .strip-center,
+  .phone-menu-sheet {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
   .strip-center,
-  .splash {
+  .splash,
+  .phone-menu-sheet {
     background: var(--bg-base);
   }
 }
