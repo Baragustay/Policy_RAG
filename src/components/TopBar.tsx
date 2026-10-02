@@ -1,4 +1,6 @@
 import { siGithub } from 'simple-icons'
+import bwDark from '../assets/squint/SquintyBWDarkmode.png'
+import bwLight from '../assets/squint/SquintBWLightmode.png'
 import type { Theme } from '../lib/theme'
 import { HelpIcon } from './icons'
 import { PhoneMenu } from './PhoneMenu'
@@ -19,9 +21,15 @@ export function TopBar({ theme, onToggleTheme, onAbout, onReplayIntro }: Props) 
       <div className="topbar-me">
         <button type="button" className="topbar-squint" onClick={onReplayIntro} aria-label="Replay intro" data-tip="Replay intro">
           <Squint mood="idle" size={38} />
+          {/* Black-and-white Squinty up here (one image per theme), so he doesn't compete with the
+              colourful one below; hover or keyboard focus brings his colour back. */}
+          <img className="topbar-squint-bw is-light" src={bwLight} alt="" draggable={false} />
+          <img className="topbar-squint-bw is-dark" src={bwDark} alt="" draggable={false} />
         </button>
         <a className="me-name" data-tip="Portfolio" href="https://barboragustafsson.com/" target="_blank" rel="noopener noreferrer">
-          Barbora Gustafsson<span className="sr-only"> (portfolio, opens in a new tab)</span>
+          {/* Full name on wider screens; just "Barbora" on phones, where the bar is tight. */}
+          Barbora<span className="me-surname"> Gustafsson</span>
+          <span className="sr-only"> (portfolio, opens in a new tab)</span>
         </a>
         <span className="me-links">
           <a href="mailto:barbora.gustafsson@gmail.com" aria-label="Email Barbora" data-tip="Email">

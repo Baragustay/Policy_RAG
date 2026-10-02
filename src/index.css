@@ -673,6 +673,49 @@ h1[tabindex='-1']:focus {
 .topbar-squint:active {
   transform: scale(0.92);
 }
+/* Up here he's a still, black-and-white image (one per theme, see TopBar), so he doesn't
+   compete with the colourful Squinty below. The colour Squinty sits underneath, still, and
+   shows on hover or keyboard focus: a hint that he replays the intro. */
+.topbar-squint {
+  position: relative;
+}
+.topbar-squint .squint {
+  opacity: 0;
+}
+.topbar-squint .squint-art svg,
+.topbar-squint .squint-art ellipse,
+.topbar-squint .squint-art circle {
+  animation: none !important;
+}
+.topbar-squint-bw {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.topbar-squint-bw.is-dark,
+:root[data-theme='dark'] .topbar-squint-bw.is-light {
+  display: none;
+}
+:root[data-theme='dark'] .topbar-squint-bw.is-dark {
+  display: block;
+}
+.topbar-squint:focus-visible .squint {
+  opacity: 1;
+}
+.topbar-squint:focus-visible .topbar-squint-bw {
+  opacity: 0;
+}
+@media (hover: hover) {
+  .topbar-squint:hover .squint {
+    opacity: 1;
+  }
+  .topbar-squint:hover .topbar-squint-bw {
+    opacity: 0;
+  }
+}
 .me-name {
   color: var(--ink);
   font-weight: 700;
@@ -1649,6 +1692,9 @@ h1[tabindex='-1']:focus {
   display: flex;
   align-items: center;
   gap: 24px;
+  /* Glass cards each keep their own layer (backdrop-filter), so Squinty's hover bubble could
+     only reach above the next card if this whole card sits above it. */
+  z-index: 2;
 }
 .about-intro-text {
   flex: 0 1 auto;
@@ -2034,6 +2080,15 @@ h1[tabindex='-1']:focus {
   }
   .me-name {
     font-size: 0.8125rem;
+  }
+  /* Hidden visually only, so screen readers still hear the full name. */
+  .me-surname {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .me-links a {
     width: 28px;
