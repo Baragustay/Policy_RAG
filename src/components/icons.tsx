@@ -10,6 +10,11 @@ export const MenuIcon = ({ size = 20 }: { size?: number }) => (
     <path d="M4 7h16M4 12h16M4 17h16" />
   </svg>
 )
+export const HomeIcon = ({ size = 20 }: { size?: number }) => (
+  <svg {...base} width={size} height={size}>
+    <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" />
+  </svg>
+)
 export const CloseIcon = ({ size = 16 }: { size?: number }) => (
   <svg {...base} width={size} height={size}>
     <path d="M6 6l12 12M18 6 6 18" />

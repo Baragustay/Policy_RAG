@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { Theme } from '../lib/theme'
 import { Footer } from './Footer'
 import { BackIcon, ChevronIcon } from './icons'
+import { PhoneMenu } from './PhoneMenu'
 import { HelloSquinty } from './Squint'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -194,7 +195,10 @@ export function About({ theme, onToggleTheme, onBack }: { theme: Theme; onToggle
         <button type="button" className="icon-btn glass" onClick={onBack} aria-label="Back to home">
           <BackIcon />
         </button>
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        <span className="desktop-only">
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        </span>
+        <PhoneMenu page="about" theme={theme} onToggleTheme={onToggleTheme} onHome={onBack} />
       </header>
 
       <main className="about-grid">

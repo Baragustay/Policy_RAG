@@ -265,7 +265,7 @@ export function QA({ entries, focus, focusOrigin, busy, onFocus, onSend, onRetry
             {entries.length === 0 && (
               <div className="examples">
                 <p className="followups-label" id="examples-label">
-                  Suggested questions
+                  Try asking
                 </p>
                 <ul aria-labelledby="examples-label">
                   {examples(focus, name).map((q, i) => (
