@@ -2047,6 +2047,33 @@ h1[tabindex='-1']:focus {
     height: 40px;
   }
 
+  /* Always in reach while scrolling. Home: the menu button is pinned where it already sits
+     (the hero's 10px/16px padding), with its place kept in the bar. About: the whole bar sticks,
+     but only its buttons catch taps, so it never blocks the page. */
+  .topbar .phone-menu {
+    width: 40px;
+    height: 40px;
+  }
+  .topbar .phone-menu > .icon-btn {
+    position: fixed;
+    z-index: 80;
+    top: calc(10px + env(safe-area-inset-top));
+    right: 16px;
+  }
+  .about-bar {
+    position: sticky;
+    z-index: 80;
+    top: 16px;
+    pointer-events: none;
+  }
+  .about-bar > * {
+    pointer-events: auto;
+  }
+  .topbar .phone-menu > .icon-btn,
+  .about-bar .icon-btn {
+    box-shadow: 0 6px 18px -8px rgb(31 27 46 / 0.45);
+  }
+
   /* Squinty and his line side by side; the search box gets the full width below. */
   .ask-row {
     display: grid;
