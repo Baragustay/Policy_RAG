@@ -60,11 +60,12 @@ export default function App() {
   const shownView = useRef<View>(view)
   const context = useRef<Context>({ question: '', type: '' })
 
-  // The splash is a short intro, never a wait: it leaves on its own after ~2 s (or on tap).
+  // The splash is a short intro, never a wait: it leaves on its own after ~2.5 s, long enough
+  // to read the subheading (or on tap).
   useEffect(() => {
     if (!splash) return
     markSplashSeen()
-    const t = setTimeout(() => setSplash(false), 2200)
+    const t = setTimeout(() => setSplash(false), 2500)
     return () => clearTimeout(t)
   }, [splash])
 

@@ -27,10 +27,20 @@ export function Splash({ onDone }: { onDone: () => void }) {
             Policy Translator
           </span>
         </motion.div>
-        <motion.p className="splash-sub" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.6 }}>
-          <span className="line">Policies explained in plain English,</span>
-          <span className="line">so you understand what you agree to.</span>
-        </motion.p>
+        {/* The two lines drift up out of a soft blur, one after the other, on a long ease-out. */}
+        <p className="splash-sub">
+          {['Policies explained in plain English,', 'so you understand what you agree to.'].map((line, i) => (
+            <motion.span
+              key={line}
+              className="line"
+              initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.45 + i * 0.2 }}
+            >
+              {line}
+            </motion.span>
+          ))}
+        </p>
       </div>
     </motion.div>
   )
