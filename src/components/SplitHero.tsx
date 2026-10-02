@@ -1,4 +1,12 @@
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'motion/react'
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useApps } from '../lib/apps'
 import { useFitText, useMedia } from '../lib/hooks'
@@ -121,13 +129,31 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
     const measure = () => {
       const gap = parseFloat(getComputedStyle(track).columnGap) || 0
       copyWidth.current = (track.scrollWidth - parseFloat(getComputedStyle(track).paddingLeft) * 2 + gap) / COPIES
-      track.style.setProperty('--copy', `${copyWidth.current}px`)
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(track)
     return () => ro.disconnect()
   }, [COPIES, ids.length])
+
+  // The slide is driven from JS rather than a CSS animation: pausing a CSS animation makes Chrome
+  // hand the position back from the compositor, and the strip visibly jumps a few pixels.
+  // Here the speed eases down to zero instead, so it glides to a stop and picks up again.
+  // It stops while hovered (mouse only), focused from the keyboard, touched, or dragged.
+  const [stripHovered, setStripHovered] = useState(false)
+  const [keyFocus, setKeyFocus] = useState(false)
+  const paused = stripHovered || keyFocus || dragging || touchHeld || (settled && !hoverOnly)
+  const slide = useMotionValue(0)
+  const speed = useRef(1)
+  useAnimationFrame((_, delta) => {
+    const w = copyWidth.current
+    if (reduced || !w) return
+    // Ease toward the target speed (about 0.25 s either way), then move one copy per 60 s.
+    speed.current += ((paused ? 0 : 1) - speed.current) * Math.min(1, delta / 80)
+    if (speed.current < 0.001) return
+    const next = slide.get() - ((w / 60) * speed.current * delta) / 1000
+    slide.set(next <= -w ? next + w : next)
+  })
 
   // Dragging or scrolling wraps around too, so the strip never ends.
   const onStripScroll = () => {
@@ -186,24 +212,31 @@ export function SplitHero({ focus, onPick, onPickAll }: Props) {
       <div className="strip-wrap">
         <motion.div
           ref={stripRef}
-          className={`strip ${reduced ? 'is-static' : ''} ${dragging ? 'is-dragging' : ''} ${touchHeld || (settled && !hoverOnly) ? 'is-held' : ''}`}
+          className={`strip ${dragging ? 'is-dragging' : ''}`}
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
+          onPointerEnter={(e) => e.pointerType === 'mouse' && hoverOnly && setStripHovered(true)}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
-          onPointerLeave={endDrag}
+          onPointerLeave={(e) => {
+            setStripHovered(false)
+            endDrag(e)
+          }}
           onPointerCancel={endDrag}
           onScroll={onStripScroll}
+          // Keyboard focus only: a tap also focuses, and must not keep it paused.
+          onFocus={(e) => setKeyFocus(e.target.matches(':focus-visible'))}
+          onBlur={() => setKeyFocus(false)}
           tabIndex={0}
           role="region"
           aria-label="Service logos. Use the arrow keys to scroll."
         >
           <motion.div className="strip-drift" style={{ x: reduced ? 0 : drift }}>
-            <ul className="strip-track" ref={trackRef} aria-label="Ask about one service">
+            <motion.ul className="strip-track" ref={trackRef} style={{ x: slide }} aria-label="Ask about one service">
               {Array.from({ length: COPIES }, (_, copy) => ids.map((id) => tile(id, copy)))}
-            </ul>
+            </motion.ul>
           </motion.div>
         </motion.div>
 

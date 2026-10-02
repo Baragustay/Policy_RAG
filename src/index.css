@@ -768,29 +768,8 @@ h1[tabindex='-1']:focus {
   display: flex;
   gap: 10px;
   width: max-content;
-  /* Slides by exactly one copy of the logos (measured); one copy per 60 s. */
-  animation: filmstrip 60s linear infinite;
-}
-/* Stops while someone is hovering, using the keyboard on it, or touching it
-   (keyboard focus only: a tap also focuses, and must not keep it paused). */
-.strip:has(:focus-visible) .strip-track,
-.strip:focus-visible .strip-track,
-.strip.is-held .strip-track {
-  animation-play-state: paused;
-}
-/* Only on devices that really hover: phones keep a "sticky" hover after a tap. */
-@media (hover: hover) {
-  .strip:hover .strip-track {
-    animation-play-state: paused;
-  }
-}
-.strip.is-static .strip-track {
-  animation: none;
-}
-@keyframes filmstrip {
-  to {
-    transform: translateX(calc(-1 * var(--copy, 50%)));
-  }
+  /* Slides by exactly one copy of the logos (measured), driven from SplitHero. */
+  will-change: transform;
 }
 
 .strip-tile {
@@ -2029,7 +2008,6 @@ h1[tabindex='-1']:focus {
   .prompt summary svg {
     transition: none;
   }
-  .strip-track,
   .squint-art svg,
   .squint-art ellipse,
   .squint-art circle {
