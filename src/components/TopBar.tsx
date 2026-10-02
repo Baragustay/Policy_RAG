@@ -1,6 +1,5 @@
 import { siGithub } from 'simple-icons'
-import bwDark from '../assets/squint/SquintyBWDarkmode.png'
-import bwLight from '../assets/squint/SquintBWLightmode.png'
+import bwPale from '../assets/squint/SquintyBWDarkmode.png'
 import type { Theme } from '../lib/theme'
 import { HelpIcon } from './icons'
 import { PhoneMenu } from './PhoneMenu'
@@ -21,10 +20,9 @@ export function TopBar({ theme, onToggleTheme, onAbout, onReplayIntro }: Props) 
       <div className="topbar-me">
         <button type="button" className="topbar-squint" onClick={onReplayIntro} aria-label="Replay intro" data-tip="Replay intro">
           <Squint mood="idle" size={38} />
-          {/* Black-and-white Squinty up here (one image per theme), so he doesn't compete with the
+          {/* Pale black-and-white Squinty up here (in both themes), so he doesn't compete with the
               colourful one below; hover or keyboard focus brings his colour back. */}
-          <img className="topbar-squint-bw is-light" src={bwLight} alt="" draggable={false} />
-          <img className="topbar-squint-bw is-dark" src={bwDark} alt="" draggable={false} />
+          <img className="topbar-squint-bw" src={bwPale} alt="" draggable={false} />
         </button>
         <a className="me-name" data-tip="Portfolio" href="https://barboragustafsson.com/" target="_blank" rel="noopener noreferrer">
           {/* Full name on wider screens; just "Barbora" on phones, where the bar is tight. */}

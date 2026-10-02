@@ -673,11 +673,16 @@ h1[tabindex='-1']:focus {
 .topbar-squint:active {
   transform: scale(0.92);
 }
-/* Up here he's a still, black-and-white image (one per theme, see TopBar), so he doesn't
+/* Up here he's a still, pale black-and-white image (see TopBar), so he doesn't
    compete with the colourful Squinty below. The colour Squinty sits underneath, still, and
    shows on hover or keyboard focus: a hint that he replays the intro. */
 .topbar-squint {
   position: relative;
+}
+/* Crossfade between the two, slow enough to feel soft. */
+.topbar-squint .squint,
+.topbar-squint-bw {
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .topbar-squint .squint {
   opacity: 0;
@@ -695,13 +700,6 @@ h1[tabindex='-1']:focus {
   object-fit: contain;
   pointer-events: none;
 }
-.topbar-squint-bw.is-dark,
-:root[data-theme='dark'] .topbar-squint-bw.is-light {
-  display: none;
-}
-:root[data-theme='dark'] .topbar-squint-bw.is-dark {
-  display: block;
-}
 .topbar-squint:focus-visible .squint {
   opacity: 1;
 }
@@ -717,6 +715,10 @@ h1[tabindex='-1']:focus {
   }
 }
 .me-name {
+  /* Padding for the hover background, given back by the margin so the text doesn't move. */
+  margin: -6px -8px;
+  padding: 6px 8px;
+  border-radius: 8px;
   color: var(--ink);
   font-weight: 700;
   font-size: 0.875rem;
@@ -736,8 +738,25 @@ h1[tabindex='-1']:focus {
   border-radius: 8px;
   color: var(--ink);
 }
+.me-name:hover,
 .me-links a:hover {
   background: var(--glass-strong);
+}
+/* Name and contact icons turn orange on hover, matching Squinty's colour coming back. */
+.me-name,
+.me-links a {
+  transition: color 0.25s ease, background-color 0.25s ease;
+}
+@media (hover: hover) {
+  /* Squinty's lighter peach-orange; a shade deeper on the light background so it still reads. */
+  .me-name:hover,
+  .me-links a:hover {
+    color: #f5866a;
+  }
+  :root[data-theme='dark'] .me-name:hover,
+  :root[data-theme='dark'] .me-links a:hover {
+    color: #ff9f86;
+  }
 }
 .linkedin-mark {
   display: block;
